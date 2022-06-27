@@ -4,9 +4,10 @@
 > End-of-degree Project for Universidad de La Laguna  
 > 08/07/2022
 
-To run the application, go to the root directory of the repository and run the binary named: PerseumAI.  
+To run the application, go to the _Linux-executable_ or _Windows-executable_ directories of the repository and run the binary named: PerseumAI.  
 For Linux the statement will be as follow:  
 
+```cd Linux-executable/```   
 ```./PerseumAI```  
 
 And for Windows 10:
