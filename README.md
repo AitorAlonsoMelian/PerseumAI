@@ -1,1 +1,22 @@
-Comando para construir binario: pyinstaller --onefile --icon=resources/mini-logo.png source/PerseumAI.py --hidden-import='PIL._tkinter_finder'
+# PerseumAI
+
+> Gabriel García Jaubert  
+> End-of-degree Project for Universidad de La Laguna  
+> 08/07/2022
+
+To run the application, go to the root directory of the repository and run the binary named: PerseumAI.  
+For Linux the statement will be as follow:  
+
+```./PerseumAI```  
+
+And for Windows 10:
+
+```exec PerseumAI```
+
+Some samples of input files can be found on _resources/templates/_
+
+If you wish to execute the program using python3 interpreter, you can find the PerseumAI.py inside the _source/_ directory.  The execution statement would look like:
+
+```python3 source/PerseumAI```
+
+**WARNING**: This tool has the sole purpose of serving as an aid for those stock market operations that you wish to carry out. Any damage or loss caused by this tool does not fall under the responsability of the tool itself, nor of the development team.
