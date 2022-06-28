@@ -12,9 +12,11 @@ For Linux the statement will be as follow:
 
 And for Windows 10:
 
-```exec PerseumAI```
+```start PerseumAI```
 
-Some samples of input files can be found on _resources/templates/_
+You can also double-click from the Windows file explorer.
+
+Some samples of input files can be found on "_resources/templates/_".
 
 If you wish to execute the program using python3 interpreter, you can find the PerseumAI.py inside the _source/_ directory.  The execution statement would look like:
 
