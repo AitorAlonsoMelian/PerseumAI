@@ -1,5 +1,3 @@
-from turtle import distance, title
-from unittest import result
 import pandas as pd
 import pattern_utils
 import Pattern as p

@@ -1,12 +1,9 @@
-from curses import window
-from random import randint
 import pandas as pd
 import re
 import os
 import csv
 import dtw_applier
 import normalize_utils
-from scipy.interpolate import make_interp_spline, BSpline
 import numpy as np
 import matplotlib.pyplot as plt
 from random import randint

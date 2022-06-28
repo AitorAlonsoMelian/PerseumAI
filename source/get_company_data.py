@@ -1,4 +1,3 @@
-import requests
 import yfinance as yf
 import pandas as pd
 import normalize_utils as nu
