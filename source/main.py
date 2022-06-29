@@ -5,6 +5,8 @@ import sys
 import tendencyCalculator as tc
 import matplotlib.pyplot as plt
 
+WINDOW_SIZE = 51
+
 """
 Main file for programme. This script manages user input and executes the highest-level functions
 """
@@ -24,7 +26,7 @@ def trainHistoricDatabase(company, year, patterns_dictionary):
     company_dataframe = get_company_data.getCompanyDataWithYahoo(company, year + '-01-01')
     if company_dataframe.empty:
         exit("Dataframe vacío")
-    patterns_found = pattern_search.findHistoricPatterns(60, company_dataframe, patterns_dictionary, company)
+    patterns_found = pattern_search.findHistoricPatterns(WINDOW_SIZE, company_dataframe, patterns_dictionary, company)
     #plt.show()
     average_tendency = pattern_utils.calculateTendencyProbability(patterns_found, patterns_dictionary.keys())
     return patterns_found
