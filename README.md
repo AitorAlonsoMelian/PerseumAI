@@ -20,6 +20,6 @@ Some samples of input files can be found on "_resources/templates/_".
 
 If you wish to execute the program using python3 interpreter, you can find the PerseumAI.py inside the _source/_ directory.  The execution statement would look like:
 
-```python3 source/PerseumAI```
+```python3 source/PerseumAI.py```
 
 **WARNING**: This tool has the sole purpose of serving as an aid for those stock market operations that you wish to carry out. Any damage or loss caused by this tool does not fall under the responsability of the tool itself, nor of the development team.
