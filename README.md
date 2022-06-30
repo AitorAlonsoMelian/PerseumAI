@@ -8,11 +8,11 @@ To run the application, go to the _Linux-executable_ or _Windows-executable_ dir
 For Linux the statement will be as follow:  
 
 ```cd Linux-executable/```   
-```./PerseumAI```  
+```./PerseumAI.exe```  
 
 And for Windows 10:
 
-```start PerseumAI```
+```start PerseumAI.exe```
 
 You can also double-click from the Windows file explorer.
 
