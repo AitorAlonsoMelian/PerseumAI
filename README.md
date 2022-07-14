@@ -4,7 +4,7 @@
 > End-of-degree Project for Universidad de La Laguna  
 > 08/07/2022
 
-IMPORTANT: In order to download this project correctly, you must have Github LFS installed and use "git clone..."
+**IMPORTANT: In order to download this project correctly, you must have Github LFS installed and use "git clone..."**
 
 To run the application, go to the _Linux-executable_ or _Windows-executable_ directory on the repository and run the binary named: PerseumAI.  
 For Linux the statement will be as follow:  
