@@ -45,13 +45,17 @@ def loadPatterns(number_of_desired_patterns, pattern_types_set):
         for index in elected_files_indexes_set:
             file = file_list[index]
             single_file_results = []
+            #print("Opening file: " + file)
             with open(PATTERNS_FILE_PATH + pattern_type + '/' + file) as csvfile:
                 reader = csv.reader(csvfile)
                 next(reader, None)
                 for row in reader:
+                    #print(row)
                     single_file_results.append(round(float(row[1]), 3))
             total_results.append(single_file_results)
-        patterns_dictionary[pattern_type] = total_results    
+        patterns_dictionary[pattern_type] = total_results
+    patterns_dictionary = calculateDictSimpleMovingAverage(patterns_dictionary, 3)
+    #print(patterns_dictionary)
     return patterns_dictionary
 
 def findCommonPattern(normalized_vector, all_patterns_dictionary):
@@ -64,15 +68,29 @@ def findCommonPattern(normalized_vector, all_patterns_dictionary):
             common_pattern_type (str): type of the type for the pattern
             minimum_distance (float): minimum distance found between the best match and the vector
     """
+    #print("Finding common pattern for: " + str(normalized_vector))
+    #print("All patterns: " + str(all_patterns_dictionary))
     minimun_distance = BIG_NUMBER
     common_pattern_type = 'rest_normalized'
+    dict_of_distances = {}
     for pattern_type in all_patterns_dictionary.keys():
+        array_of_distances = []
         for single_pattern in all_patterns_dictionary[pattern_type]:
             current_distance = dtw_applier.comparePatterns(normalized_vector, single_pattern)
-            if current_distance < minimun_distance:
-                common_pattern_type = pattern_type
-                minimun_distance = current_distance
-    
+            array_of_distances.append(current_distance)
+        if pattern_type != 'rest_normalized':
+            array_of_distances = np.array(array_of_distances)
+            mean = np.mean(array_of_distances)
+            print(array_of_distances)
+            print("Mean: " + str(mean))
+            dict_of_distances[pattern_type] = mean
+            print(dict_of_distances)
+
+    for pattern_type, distance in dict_of_distances.items():
+        if distance < minimun_distance:
+            common_pattern_type = pattern_type
+            minimun_distance = distance
+    print("Common pattern found: " + common_pattern_type + " with distance: " + str(minimun_distance))
     return common_pattern_type, minimun_distance
 
 def enhanceDataframe(distance_found, pattern_type, sliced_vector, all_patterns_dictionary, window_divisions):
@@ -161,3 +179,52 @@ def calculateTendencyProbability(results, pattern_types):
         else: 
             average_tendency_dict[pattern_type] = value[0] / value[1] * 100
     return average_tendency_dict
+
+def calculateSimpleMovingAverage(dataframe, window_size):
+    """Calculate the simple moving average for a given dataframe and window size
+
+        Args:  
+            dataframe (DataFrame): dataframe containing the prices
+            window_size (int): size of the window to calculate the moving average  
+        Return:  
+            dataframe (DataFrame): dataframe containing the prices and the moving average
+    """
+    dataframe['SMA'] = dataframe['Close'].rolling(window=window_size).mean()
+    return dataframe
+
+#Create a function that calculates the simple moving average of a given Dictionary and window size that does not use the calculateSimpleMovingAverage function
+def calculateDictSimpleMovingAverage(patterns_dict, window_size):
+    """Calculate the simple moving average for a given dictionary and window size
+
+        Args:  
+            patterns_dict (Dict{}): dictionary containing the prices
+            window_size (int): size of the window to calculate the moving average  
+        Return:  
+            patterns_dict (Dict{}): dictionary containing the prices and the moving average
+    """
+    results = dict()
+    #print("\n\n\n\nTest\n\n\n\n")
+    for key, vector in patterns_dict.items():
+        for i in range(len(vector)):
+            vector[i] = calculateArraySimpleMovingAverage(vector[i], window_size)
+    # print("\n\n\n\n")
+    # print(patterns_dict)
+    # print("\n\n\n\n")
+    return patterns_dict
+
+#A function that calculates simple moving average of an array
+def calculateArraySimpleMovingAverage(array, window_size):
+    """Calculate the simple moving average for a given array and window size
+
+        Args:  
+            array (List[]): array containing the prices
+            window_size (int): size of the window to calculate the moving average  
+        Return:  
+            array (List[]): array containing the prices and the moving average
+    """
+    results = []
+    for i in range(len(array)):
+        if i >= window_size:
+            aux = sum(array[i-window_size:i]) / window_size
+            results.append(round(aux,4))
+    return results

@@ -11,6 +11,8 @@ import main as mn
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 import re
+import os
+import pandas as pd
 
 """Code for GUI of Perseum AI"""
 
@@ -48,8 +50,9 @@ class MenuWindow:
     def __init__(self, master):
         self.master = master
         self.companies = None
-        pattern_types = ['Double top', 'Double bottom']
+        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders']
         self.selected_types = []
+        self.file_name = ''
 
         self.frame = Frame(self.master, height=2000, width=500, bg=MAIN_BG)
         self.patterns_type = Label(self.frame, text='Choose which patterns to find', font=(FONT, 18), fg=FG, bg=MAIN_BG, highlightthickness=0)
@@ -59,7 +62,7 @@ class MenuWindow:
             pattern_type_dict = {
                 'type': type,
                 'value': value,
-                'button': Checkbutton(self.types_frame, text=type, height=1, width=12, variable=value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) #, font=FONT, variable=value, bg=MAIN_BG, fg=FG, activebackground="#69AAF5", highlightthickness=0
+                'button': Checkbutton(self.types_frame, text=type, height=1, width=14, variable=value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) #, font=FONT, variable=value, bg=MAIN_BG, fg=FG, activebackground="#69AAF5", highlightthickness=0
             }
             pattern_type_dict['button'].pack(side=LEFT, pady=15)
             self.selected_types.append(pattern_type_dict)
@@ -67,7 +70,8 @@ class MenuWindow:
         self.year_label = Label(self.frame, text='Year to start counting from', font=FONT, bg=MAIN_BG, fg=FG)
         self.year_entry = Entry(self.frame)
         self.open_file_button = Button(self.frame, text = 'Open file', width = 25, command = self.openTxt, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
-        self.warning_file_label = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
+        self.selected_file = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
+        #self.warning_file_label = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
         self.intensive_search_frame = Frame(self.frame, bg=MAIN_BG)
         self.intensive_search_value = BooleanVar(self.intensive_search_frame)
         self.intensive_search_check = Checkbutton(self.intensive_search_frame, text='Intensive search mode', height=1, width=18, variable=self.intensive_search_value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) 
@@ -79,7 +83,8 @@ class MenuWindow:
         self.types_frame.pack()
         self.year_entry.pack(pady=5)
         self.open_file_button.pack(pady=5)
-        self.warning_file_label.pack()
+        self.selected_file.pack()
+        #self.warning_file_label.pack()
         self.intensive_search_frame.pack()
         self.intensive_search_check.pack()
         self.run_button.pack(pady=(100,5))
@@ -91,7 +96,7 @@ class MenuWindow:
     def runProgram(self):
         """Execute the back-end program with the parametes given by the user"""
         if self.companies == None:
-            self.warning_file_label.configure(text='Please select a file')
+            self.selected_file.configure(text='Please select a file')
             return
         if not self.year_entry.get():
             return
@@ -102,6 +107,8 @@ class MenuWindow:
                     selected_types_set.add('double_top')
                 elif pattern_type['type'] == 'Double bottom':
                     selected_types_set.add('double_bottom')
+                elif pattern_type['type'] == 'Head & Shoulders':
+                    selected_types_set.add('head_and_shoulders')
         patterns_dictionary = pattern_utils.loadPatterns(15, selected_types_set)
         historic_results = []
         current_results = []
@@ -123,6 +130,7 @@ class MenuWindow:
         text_file = filedialog.askopenfile(initialdir='./', title="Open Text File", filetypes=(("Text Files", "*.txt"), ))
         if text_file != None:
             text_file = open(text_file.name, 'r')
+            self.selected_file.configure(text="Selected file: " + os.path.basename(text_file.name))
             input_text = text_file.read()
             self.companies = self.parseTxt(input_text)
             text_file.close()
@@ -226,8 +234,17 @@ class ShowPatternsWindow:
             temp_frame = Frame(self.second_frame, bg=MAIN_BG)
             fig = Figure(figsize = (9,5), dpi = 100)
             plot1 = fig.add_subplot(111)
-            plot1.plot(pattern.dataframe_segment)
-            fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]}')
+            #print(pattern.dataframe_segment.info())
+            plot1.plot(pattern.dataframe_segment.iloc[:, 0])
+            # df2 = pd.DataFrame({
+            #     'Date': pd.date_range("20130101", periods=2),
+            #     'Close': [160,180]
+            # })
+            #print("\n\n")
+            df2 = pattern.points
+            #print(df2.info())
+            #plot1.plot(df2)
+            fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
             canvas = FigureCanvasTkAgg(fig, master=temp_frame)
             canvas.draw()
             temp_frame.pack()

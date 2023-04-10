@@ -3,7 +3,7 @@ class Pattern:
     Pattern class used to represent all data related to the found patterns
     """
 
-    def __init__(self, pattern_type, dataframe_segment, company_name, starting_date, ending_date, tendency):
+    def __init__(self, pattern_type, dataframe_segment, company_name, starting_date, ending_date, tendency, distance, points = None):
         self.pattern_type = pattern_type
         """str: Type of the given pattern"""
         self.dataframe_segment = dataframe_segment
@@ -16,7 +16,11 @@ class Pattern:
         """str: Ending date of the pattern found"""
         self.tendency = tendency
         """Boolean: tendency of the pattern found (achieved or not)"""
+        self.distance = distance
+        """float: distance between the pattern found and the closest pattern in the dictionary"""
+        self.points = points
+        """Dataframe[]: points of interest to draw a line on the final canvas"""
 
     def __str__(self):
         """Transforms the object to string"""
-        return f'[{self.pattern_type}, {self.starting_date}, {self.ending_date}]'
+        return f'[{self.pattern_type}, {self.starting_date}, {self.ending_date}, {self.points}]'

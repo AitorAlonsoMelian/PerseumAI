@@ -3,6 +3,7 @@ import pandas as pd
 import normalize_utils as nu
 import matplotlib.pyplot as plt
 from random import randint
+import os
 
 def getCompanyDataWithAlpha(company):
     """
@@ -65,8 +66,12 @@ def createDatasetsFromList(list, patterns_path):
         dataframe.to_csv(patterns_path + item[3] + '/' + item[0] + str(randint(0, 999)) + '.csv', sep = ',')
         plt.show()
 
-companies_list = [ #['', '', '', 'triple_top'],
-    ['WHR', '2021-11-16', '2022-01-04', 'double_bottom']
+# companies_list = [ #['', '', '', 'triple_top'],
+#     ['WHR', '2021-11-16', '2022-01-04', 'double_bottom']
+# ]
+
+companies_list = [ 
+    ['WAFD', '2022-07-19', '2023-03-17', 'head_and_shoulders'],
 ]
 
 #createDatasetsFromList(companies_list, './patterns/')

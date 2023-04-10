@@ -56,6 +56,7 @@ def normalizeVector(vector):
 
     for number in vector:
         number = float(number)
+        #print(vector)
         normalized_number = (number - min_number) / (max_number - min_number)
         normalized_vector.append(round(normalized_number, 3))
 

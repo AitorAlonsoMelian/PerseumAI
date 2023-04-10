@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from random import randint
 import normalize_utils as nu
 
-INCREMENT = 1
+INCREMENT = 25
+SMA_VALUE = 3
     
 def findCurrentPatterns(start_index, finish_index, company_dataframe, patterns_dictionary, company_name, intensive_search):
     """Find patterns that are occuring the day of the search  
@@ -29,9 +30,9 @@ def findCurrentPatterns(start_index, finish_index, company_dataframe, patterns_d
     for i in range(finish_index, start_index, -1): # hay que añadir que itere por todos y que se quede con el de menor distancia 
         if len(patterns_dictionary_copy.keys()) == 1:
             break
-        if i > company_dataframe.size:
-            i = company_dataframe.size
-        sliced_dataframe = company_dataframe.iloc[company_dataframe.size - i:]
+        if i > len(company_dataframe):
+            i = len(company_dataframe)
+        sliced_dataframe = company_dataframe.iloc[len(company_dataframe) - i:]
         normalized_vector = nu.normalizeVector(sliced_dataframe['Close'].tolist())
         new_pattern_type, distance = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary_copy)
         if new_pattern_type != 'rest_normalized':
@@ -45,7 +46,7 @@ def findCurrentPatterns(start_index, finish_index, company_dataframe, patterns_d
     for key in distances_dict:
         if distances_dict[key][1] == -1:
             continue
-        new_pattern = p.Pattern(key, company_dataframe[company_dataframe.size - distances_dict[key][1]:], company_name, str(company_dataframe.iloc[company_dataframe.size - i].name), str(company_dataframe.iloc[company_dataframe.size - 1].name), None)
+        new_pattern = p.Pattern(key, company_dataframe[len(company_dataframe) - distances_dict[key][1]:], company_name, str(company_dataframe.iloc[len(company_dataframe) - i].name), str(company_dataframe.iloc[len(company_dataframe) - 1].name), None, distance)
         results.append(new_pattern)
             #patterns_dictionary_copy.pop(new_pattern_type)
 
@@ -64,23 +65,38 @@ def findHistoricPatterns(window_width, company_data, patterns_dictionary, compan
     patterns_found = []
     offset = 0
     i = 0
-    while i < company_data.size - window_width - 1:
+    company_data = pattern_utils.calculateSimpleMovingAverage(company_data, SMA_VALUE)
+    company_data = company_data.iloc[SMA_VALUE-1:]
+    #print("Company Data: " + company_data.to_string())
+    while i < len(company_data) - window_width - 1:
         right_window_index = i + window_width
-        if right_window_index >= company_data.size:
+        print("I: " + str(i) + " Right: " + str(right_window_index) + " Window: " + str(right_window_index - i))
+        if right_window_index >= len(company_data):
             break
         sliced_dataframe = company_data.iloc[i:right_window_index]
-        normalized_vector = nu.normalizeVector(sliced_dataframe['Close'].tolist())
+        normalized_vector = nu.normalizeVector(sliced_dataframe['SMA'].tolist())
         new_pattern_type, best_distance_found = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary)
-        if new_pattern_type != 'rest_normalized' and new_pattern_type != '':
+        if new_pattern_type != 'rest_normalized' and new_pattern_type != '' and best_distance_found < 30:
             left_index, right_index = pattern_utils.enhanceDataframe(best_distance_found, new_pattern_type, sliced_dataframe['Close'].tolist(), patterns_dictionary, [1,2,3,4])
             dataframe_segment = sliced_dataframe[left_index:right_index] #Esto sin ventana mejorada
             longer_dataframe = company_data[i + left_index:] #Quitar left_index si no se usa enhanced dataframe
-            pattern_tendency = tc.findPatternTendency(dataframe_segment, longer_dataframe, new_pattern_type)
-            if pattern_tendency != None:
-                new_pattern = p.Pattern(new_pattern_type, pattern_tendency[1], company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[dataframe_segment.size - 1].name), pattern_tendency[0])
-                patterns_found.append(new_pattern)
-            offset = sliced_dataframe.size
+            ##########################################################
+            ## ESTO ES PARA HACERLO CON TENDENCIA
+            # pattern_tendency = tc.findPatternTendency(dataframe_segment, longer_dataframe, new_pattern_type)
+            # if pattern_tendency != None:
+            #     new_pattern = p.Pattern(new_pattern_type, pattern_tendency[1], company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), pattern_tendency[0], best_distance_found, pattern_tendency[2])
+            #     patterns_found.append(new_pattern)
+            ##########################################################
+            ## ESTO ES PARA HACERLO SIN TENDENCIA
+            new_pattern = p.Pattern(new_pattern_type, dataframe_segment, company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), True, best_distance_found)
+            patterns_found.append(new_pattern)
+            ##########################################################
+            print("Right index: " + str(right_index) + " Left index: " + str(left_index) + " Window: " + str(right_index - left_index))
+            i += right_index
         else:
             offset = 0
-        i += INCREMENT + offset
+            i += INCREMENT
+#        i += INCREMENT + right_index
+    # for x in patterns_found:
+    #     print(x)
     return patterns_found
