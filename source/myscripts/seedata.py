@@ -16,7 +16,7 @@ MAIN_BG = "#20385C"
 PATTERNS_FILE_PATH = 'patterns/'
 PATTERN_TO_SHOW = 'head_and_shoulders'
 TOGGLE_SMA = True
-SMA_WINDOW_SIZE = 6
+SMA_WINDOW_SIZE = 3
 
 def getData():
     file_list = os.listdir(PATTERNS_FILE_PATH + PATTERN_TO_SHOW)

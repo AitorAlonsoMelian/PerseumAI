@@ -160,12 +160,15 @@ class ResultsWindow:
         for key, value in tendency_results.items():
             if isinstance(value, float):
                 value = str(round(value)) + '%'
-            if key == 'double_top':
-                temp_text += f'Double top: {value}\n'
-            elif key == 'double_bottom':
-                temp_text += f'Double bottom: {value}\n'
-            elif key == 'triple_top':
-                temp_text += f'Triple top: {value}\n' 
+            # if key == 'double_top':
+            #     temp_text += f'Double top: {value}\n'
+            # elif key == 'double_bottom':
+            #     temp_text += f'Double bottom: {value}\n'
+            # elif key == 'triple_top':
+            #     temp_text += f'Triple top: {value}\n' 
+            aux = key.replace('_', ' ')
+            temp_text += f'{aux.capitalize()}: {value}\n'
+            
 
         self.title_text = Label(self.frame, text='Achieve objective probability', font=(FONT,18), fg=FG, bg=MAIN_BG, highlightthickness=0)
         self.tendency_results_text = Label(self.frame, text=temp_text, font=FONT, fg=FG, bg=MAIN_BG, highlightthickness=0) #Añadir otra label comno esta para el titulo
@@ -243,7 +246,7 @@ class ShowPatternsWindow:
             #print("\n\n")
             df2 = pattern.points
             #print(df2.info())
-            #plot1.plot(df2)
+            plot1.plot(df2)
             fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
             canvas = FigureCanvasTkAgg(fig, master=temp_frame)
             canvas.draw()

@@ -77,19 +77,19 @@ def findHistoricPatterns(window_width, company_data, patterns_dictionary, compan
         normalized_vector = nu.normalizeVector(sliced_dataframe['SMA'].tolist())
         new_pattern_type, best_distance_found = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary)
         if new_pattern_type != 'rest_normalized' and new_pattern_type != '' and best_distance_found < 30:
-            left_index, right_index = pattern_utils.enhanceDataframe(best_distance_found, new_pattern_type, sliced_dataframe['Close'].tolist(), patterns_dictionary, [1,2,3,4])
+            left_index, right_index = pattern_utils.enhanceDataframeDistancesMean(best_distance_found, new_pattern_type, sliced_dataframe['Close'].tolist(), patterns_dictionary, [1,2,3,4])
             dataframe_segment = sliced_dataframe[left_index:right_index] #Esto sin ventana mejorada
             longer_dataframe = company_data[i + left_index:] #Quitar left_index si no se usa enhanced dataframe
             ##########################################################
             ## ESTO ES PARA HACERLO CON TENDENCIA
-            # pattern_tendency = tc.findPatternTendency(dataframe_segment, longer_dataframe, new_pattern_type)
-            # if pattern_tendency != None:
-            #     new_pattern = p.Pattern(new_pattern_type, pattern_tendency[1], company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), pattern_tendency[0], best_distance_found, pattern_tendency[2])
-            #     patterns_found.append(new_pattern)
+            pattern_tendency = tc.findPatternTendency(dataframe_segment, longer_dataframe, new_pattern_type)
+            if pattern_tendency != None:
+                new_pattern = p.Pattern(new_pattern_type, pattern_tendency[1], company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), pattern_tendency[0], best_distance_found, pattern_tendency[2])
+                patterns_found.append(new_pattern)
             ##########################################################
             ## ESTO ES PARA HACERLO SIN TENDENCIA
-            new_pattern = p.Pattern(new_pattern_type, dataframe_segment, company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), True, best_distance_found)
-            patterns_found.append(new_pattern)
+            # new_pattern = p.Pattern(new_pattern_type, dataframe_segment, company_name, str(dataframe_segment.iloc[0].name), str(dataframe_segment.iloc[len(dataframe_segment) - 1].name), True, best_distance_found)
+            # patterns_found.append(new_pattern)
             ##########################################################
             print("Right index: " + str(right_index) + " Left index: " + str(left_index) + " Window: " + str(right_index - left_index))
             i += right_index

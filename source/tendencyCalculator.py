@@ -99,9 +99,9 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
                 break
             current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
             if current_value > resistance[0]:
-                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]]]
+                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
             if current_value < objective:
-                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]]]
+                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
     else:
         return None #Significa que el valor no cruzo ningun limite
 
@@ -184,9 +184,9 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
                 break
             current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
             if current_value < resistance[0]:
-                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]]]
+                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
             if current_value > objective:
-                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]]]
+                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
     else:
         return None #Significa que el valor no cruzo ningun limite
     
@@ -207,23 +207,25 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     #print(data_sequence)
     for i in range(len(data_sequence) - 1): #Buscar 3 tops
         day_value = data_sequence.iloc[i][predefined_type_of_price]
-        if i > 0:
+        if i > 1:
+            previous_previous_day_value = data_sequence.iloc[i - 2][predefined_type_of_price]
             previous_day_value = data_sequence.iloc[i - 1][predefined_type_of_price]
-        if i < len(data_sequence) - 1:
+        if i < len(data_sequence) - 2:
             #print("HELLO " + str(aux) + " i: " + str(i) + " size: " + str(len(data_sequence) - 1))
             #aux+=1
             next_day_value = data_sequence.iloc[i + 1][predefined_type_of_price]
+            next_next_day_value = data_sequence.iloc[i + 2][predefined_type_of_price]
             #print(next_day_value)
-        if i > 0 and previous_day_value < day_value and day_value > next_day_value: #hemos encontrado un maximo
+        if i > 1 and previous_day_value < day_value and day_value > next_day_value and day_value > previous_previous_day_value and day_value > next_next_day_value: #hemos encontrado un maximo
             relative_maximum = day_value
             if relative_maximum > first_top[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
                 third_top = second_top
                 second_top = first_top
                 first_top = [relative_maximum, i]
-            elif relative_maximum > second_top[0]:
+            elif relative_maximum > second_top[0] and i not in range(first_top[1] - 5, first_top[1] + 5):
                 third_top = second_top
                 second_top = [relative_maximum, i]
-            elif relative_maximum > third_top[0]:
+            elif relative_maximum > third_top[0] and i not in range(first_top[1] - 5, first_top[1] + 5):
                 third_top = [relative_maximum, i]
 
 
@@ -238,33 +240,56 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None # La cabeza no está en medio
 
     support = [BIG_NUMBER, None]
+    second_top_support = [BIG_NUMBER, None]
+    third_top_support = [BIG_NUMBER, None]
     if second_top[1] > third_top[1]:
         for i in range(third_top[1], second_top[1]): #Busqueda de la linea de apoyo
             current_value = data_sequence.iloc[i][predefined_type_of_price]
             if current_value < support[0]:
                 support[0] = current_value
                 support[1] = i
+            if i < first_top[1] and current_value < third_top_support[0]:
+                third_top_support[0] = current_value
+                third_top_support[1] = i
+            if i > first_top[1] and current_value < second_top_support[0]:
+                second_top_support[0] = current_value
+                second_top_support[1] = i
     else:
         for i in range(second_top[1], third_top[1]):
             current_value = data_sequence.iloc[i][predefined_type_of_price]
             if current_value < support[0]:
                 support[0] = current_value
                 support[1] = i
+            if i < first_top[1] and current_value < third_top_support[0]:
+                third_top_support[0] = current_value
+                third_top_support[1] = i
+            if i > first_top[1] and current_value < second_top_support[0]:
+                second_top_support[0] = current_value
+                second_top_support[1] = i
 
-    # Comprobamos si los suelos no estan muy lejos
+    # Se comprueba que los picos están a alturas similares
     first_top_to_support_distance = first_top[0] - support[0]
     second_top_to_support_distance = second_top[0] - support[0]
-    if first_top_to_support_distance > second_top_to_support_distance and second_top_to_support_distance < first_top_to_support_distance * 2 / 3:
+    third_top_to_support_distance = third_top[0] - support[0]
+    if third_top_to_support_distance > second_top_to_support_distance and second_top_to_support_distance < third_top_to_support_distance * 2 / 3:
         print("4")
         return None
-    if second_top_to_support_distance > first_top_to_support_distance and first_top_to_support_distance < second_top_to_support_distance * 2 / 3:
+    if second_top_to_support_distance > third_top_to_support_distance and third_top_to_support_distance < second_top_to_support_distance * 2 / 3:
         print("5")
         return None
+    if first_top_to_support_distance * 0.85 < second_top_to_support_distance or first_top_to_support_distance * 0.85 < third_top_to_support_distance:
+        print("5.5")
+        return None
     
-    breaks_support_from_left = [False, None]
-    breaks_support_from_right = [False, None]
+    # Comprobar la altura entre los suelos y la cabeza
+    if not (second_top_support[0]/third_top_support[0] < 1.05 and second_top_support[0]/third_top_support[0] > 0.95):
+        print("9")
+        return None
+
 
     #Confirmar que en rompe por la linea de apoyo en ambos lados
+    breaks_support_from_left = [False, None]
+    breaks_support_from_right = [False, None]
     i = first_top[1]
     while i >= 0 and not breaks_support_from_left[0]:
         current_value_left = data_sequence.iloc[i][predefined_type_of_price]
@@ -301,8 +326,10 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
             current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
             if current_value > support[0]:
                 return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+                #return [False, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
             if current_value < objective:
                 return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+                #return [True, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
     else:
         print("8")
         return None

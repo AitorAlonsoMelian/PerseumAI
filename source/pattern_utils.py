@@ -81,10 +81,10 @@ def findCommonPattern(normalized_vector, all_patterns_dictionary):
         if pattern_type != 'rest_normalized':
             array_of_distances = np.array(array_of_distances)
             mean = np.mean(array_of_distances)
-            print(array_of_distances)
-            print("Mean: " + str(mean))
+            #print(array_of_distances)
+            #print("Mean: " + str(mean))
             dict_of_distances[pattern_type] = mean
-            print(dict_of_distances)
+            #print(dict_of_distances)
 
     for pattern_type, distance in dict_of_distances.items():
         if distance < minimun_distance:
@@ -122,6 +122,45 @@ def enhanceDataframe(distance_found, pattern_type, sliced_vector, all_patterns_d
                     minimum_distance = current_distance
                     best_segment_i = left_index
                     best_segment_j = right_index
+            left_index = right_index
+            right_index += window_size
+        if i == window_divisions[len(window_divisions) - 1]: #Si es la ultima parte, cogemos todo hasta donde termine
+            right_index = len(sliced_vector) - 1
+    return best_segment_i, best_segment_j
+
+def enhanceDataframeDistancesMean(distance_found, pattern_type, sliced_vector, all_patterns_dictionary, window_divisions):
+    """Given a pattern, find a better match, if possible, inside the vector  
+
+        Args:  
+            distance_found (float): minimum distance found between the best match and the vector at the moment
+            pattern_type (str): type of the pattern found
+            sliced_vector (List[]): vector containing the data where the search will take plave
+            all_patterns_dictionary (Dict{}): dictionary containing pattern types and prices
+            windows_divisions (List[]): list contaning the number that the window is wanted to be fragmented equally  
+        Return:  
+            best_segment_i (int): index where the best segment starts
+            best_segment_j (int): index where the best segment ends
+    """
+    minimum_distance = distance_found
+    best_segment_i = 0
+    best_segment_j = len(sliced_vector) - 1
+    for number_of_parts in window_divisions:
+        window_size = len(sliced_vector) // number_of_parts
+        left_index = 0
+        right_index = window_size
+        for i in range(number_of_parts):
+            split_vector = sliced_vector[left_index:right_index]
+            normalized_split_vector = normalize_utils.normalizeVector(split_vector)
+            array_of_distances = []
+            for single_pattern in all_patterns_dictionary[pattern_type]:
+                current_distance = dtw_applier.comparePatterns(normalized_split_vector, single_pattern)
+                array_of_distances.append(current_distance)
+            array_of_distances = np.array(array_of_distances)
+            mean = np.mean(array_of_distances)
+            if mean <= minimum_distance:
+                minimum_distance = mean
+                best_segment_i = left_index
+                best_segment_j = right_index
             left_index = right_index
             right_index += window_size
         if i == window_divisions[len(window_divisions) - 1]: #Si es la ultima parte, cogemos todo hasta donde termine
