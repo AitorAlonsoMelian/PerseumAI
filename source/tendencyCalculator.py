@@ -14,6 +14,8 @@ def findPatternTendency(data_sequence, longer_data_sequence, type):
         return findDoubleBottomTendency(data_sequence, longer_data_sequence)
     if type == 'head_and_shoulders':
         return findHeadAndShouldersTendency(data_sequence, longer_data_sequence)
+    if type == 'descending_triangle':
+        return findDescendingTriangleTendency(data_sequence, longer_data_sequence)
     else:
         raise Exception('Pattern type not found')
 
@@ -282,7 +284,7 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None
     
     # Comprobar la altura entre los suelos y la cabeza
-    if not (second_top_support[0]/third_top_support[0] < 1.05 and second_top_support[0]/third_top_support[0] > 0.95):
+    if not (second_top_support[0]/third_top_support[0] < 1.02 and second_top_support[0]/third_top_support[0] > 0.98):
         print("9")
         return None
 
@@ -321,18 +323,56 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     objective = support[0] - average_height
     if pattern_width:
         for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width):
-            if i >= len(longer_data_sequence):
+            if i+2 >= len(longer_data_sequence):
                 break
             current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-            if current_value > support[0]:
-                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+            if all(x > support[0] for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
+                return [False, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
                 #return [False, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
-            if current_value < objective:
-                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+            if all(x < objective for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
+                return [True, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
                 #return [True, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
     else:
         print("8")
         return None
     
+def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
+    """Calculates the tendency for a descending triangle pattern
 
-    
+        Args:
+            data_sequence (dataframe): dataframe representing the pattern
+            longer_data_sequence (dataframe): dataframe representing the pattern but ends on the day the search is made
+        Return:
+            tendency (Pair[]): first element for True, False or None, and second element for the specific dataframe containing the pattern
+            but it ends where the tendency was determined
+    """
+    support = [BIG_NUMBER, None]
+    for i in range(len(data_sequence) - 1):
+        day_value = data_sequence.iloc[i][predefined_type_of_price]
+        if day_value < support[0]:
+            support[0] = day_value
+            support[1] = i
+
+    support_point = longer_data_sequence.iloc[[support[1]]][predefined_type_of_price]
+
+    new_date = pd.to_datetime(data_sequence.iloc[[0]].index)
+    new_entry = pd.Series(support_point.iloc[0], index=new_date, name='Close')
+    new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index)
+    new_entry_2 = pd.Series(support_point.iloc[0], index=new_date_2, name='Close')
+
+    support_point = pd.concat([support_point, new_entry, new_entry_2])
+    return [True, data_sequence, support_point]  
+
+def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
+    """Calculates the tendency for a ascending triangle pattern
+
+        Args:
+            data_sequence (dataframe): dataframe representing the pattern
+            longer_data_sequence (dataframe): dataframe representing the pattern but ends on the day the search is made
+        Return:
+            tendency (Pair[]): first element for True, False or None, and second element for the specific dataframe containing the pattern
+            but it ends where the tendency was determined
+    """
+
+    print()
+    return None

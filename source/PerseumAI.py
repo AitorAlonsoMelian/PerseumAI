@@ -50,7 +50,7 @@ class MenuWindow:
     def __init__(self, master):
         self.master = master
         self.companies = None
-        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders']
+        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Ascending Triangle', 'Descending Triangle']
         self.selected_types = []
         self.file_name = ''
 
@@ -109,6 +109,10 @@ class MenuWindow:
                     selected_types_set.add('double_bottom')
                 elif pattern_type['type'] == 'Head & Shoulders':
                     selected_types_set.add('head_and_shoulders')
+                elif pattern_type['type'] == 'Ascending Triangle':
+                    selected_types_set.add('ascending_triangle')
+                elif pattern_type['type'] == 'Descending Triangle':
+                    selected_types_set.add('descending_triangle')
         patterns_dictionary = pattern_utils.loadPatterns(15, selected_types_set)
         historic_results = []
         current_results = []
@@ -246,7 +250,8 @@ class ShowPatternsWindow:
             #print("\n\n")
             df2 = pattern.points
             #print(df2.info())
-            plot1.plot(df2)
+            if pattern.points is not None:
+                plot1.plot(df2)
             fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
             canvas = FigureCanvasTkAgg(fig, master=temp_frame)
             canvas.draw()

@@ -39,6 +39,8 @@ def loadPatterns(number_of_desired_patterns, pattern_types_set):
         file_list = os.listdir(PATTERNS_FILE_PATH + pattern_type)
         total_results = []
         elected_files_indexes_set = set()
+        if len(file_list) < number_of_desired_patterns:
+            number_of_desired_patterns = len(file_list)
         while len(elected_files_indexes_set) < number_of_desired_patterns:
             elected_files_indexes_set.add(randint(0, len(file_list) - 1))
 
@@ -90,7 +92,7 @@ def findCommonPattern(normalized_vector, all_patterns_dictionary):
         if distance < minimun_distance:
             common_pattern_type = pattern_type
             minimun_distance = distance
-    print("Common pattern found: " + common_pattern_type + " with distance: " + str(minimun_distance))
+    #print("Common pattern found: " + common_pattern_type + " with distance: " + str(minimun_distance))
     return common_pattern_type, minimun_distance
 
 def enhanceDataframe(distance_found, pattern_type, sliced_vector, all_patterns_dictionary, window_divisions):
