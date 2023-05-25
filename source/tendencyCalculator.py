@@ -347,21 +347,97 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
             but it ends where the tendency was determined
     """
     support = [BIG_NUMBER, None]
-    for i in range(len(data_sequence) - 1):
+    for i in range(len(data_sequence)):
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if day_value < support[0]:
             support[0] = day_value
             support[1] = i
 
-    support_point = longer_data_sequence.iloc[[support[1]]][predefined_type_of_price]
+    times_near_support = 0
+
+    local_maxs = []
+    absolute_maximum = [0, None]
+    for i in range(len(data_sequence) - 1):
+        # Comprobar si es un mínimo local
+        if data_sequence.iloc[i][predefined_type_of_price] < data_sequence.iloc[i + 1][predefined_type_of_price] and data_sequence.iloc[i][predefined_type_of_price] < data_sequence.iloc[i - 1][predefined_type_of_price]:
+            if (data_sequence.iloc[i][predefined_type_of_price] / support[0]) > 0.98 and (data_sequence.iloc[i][predefined_type_of_price] / support[0]) < 1.02:
+                times_near_support += 1
+        if all(x < data_sequence.iloc[i][predefined_type_of_price] for x in data_sequence.iloc[i-3:i][predefined_type_of_price]) and all (x < data_sequence.iloc[i][predefined_type_of_price] for x in data_sequence.iloc[i+1:i+4][predefined_type_of_price]):
+            local_maxs.append(i)
+        if data_sequence.iloc[i][predefined_type_of_price] > absolute_maximum[0]:
+            absolute_maximum = [data_sequence.iloc[i][predefined_type_of_price], i]
+
+    #  Comprobar que el precio se acerca al soporte al menos 3 veces
+    if times_near_support < 3:
+        return None
+    # Comprobar que el máximo absoluto está en el primer tercio del patrón
+    if absolute_maximum[1] > len(data_sequence) / 3:
+        print("Maximo absoluto demasiado lejos del inicio del patrón")
+        return None
+    # Comprobar que los picos son decrecientes
+    for i in range(len(local_maxs)):
+        if local_maxs[i] <= absolute_maximum[1]:
+            continue
+        if data_sequence.iloc[local_maxs[i]][predefined_type_of_price] * 0.96 > data_sequence.iloc[local_maxs[i-1]][predefined_type_of_price]: # Si un pico es mayor que el anterior en un 4% o más se descarta
+            return None
+        
+    # Comprobar si el triangulo está cerrado (O próximo a cerrarse)
+    if (data_sequence.iloc[-1][predefined_type_of_price] / support[0]) > 1.03:
+        print("Triangulo no cerrado")
+        return None
+    pattern_height = absolute_maximum[0] - support[0]
+    if (data_sequence.iloc[-1][predefined_type_of_price] - support[0]) > pattern_height * 0.25:
+        print("Triangulo no cerrado 2")
+        return None
+    
+    # Crear la pendiente de la diagonal P(X,Y) = (indice,valor) P1 = (Maximo absoluto), P2 = (Ultimo valor del patron)
+    m = (data_sequence.iloc[absolute_maximum[1]][predefined_type_of_price] - data_sequence.iloc[-1][predefined_type_of_price] )/(absolute_maximum[1] - (len(data_sequence)-1))
+    b =  absolute_maximum[0] - m * absolute_maximum[1]
+    # Escribir en un fichero de texto para ver el resultao :)
+    for i in range(absolute_maximum[1], len(data_sequence)):
+        if data_sequence.iloc[i][predefined_type_of_price] / (m * i + b) > 1.01:
+            print("Los valores se pasan demasiado de la diagonal (Por arriba)")
+            return None
+
+    # Se crea la línea de soporte y la línea diagonal
+    support_line = longer_data_sequence.iloc[[support[1]]][predefined_type_of_price]
 
     new_date = pd.to_datetime(data_sequence.iloc[[0]].index)
-    new_entry = pd.Series(support_point.iloc[0], index=new_date, name='Close')
-    new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index)
-    new_entry_2 = pd.Series(support_point.iloc[0], index=new_date_2, name='Close')
+    new_entry = pd.Series(support_line.iloc[0], index=new_date, name='Close')
+    new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
+    new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 
-    support_point = pd.concat([support_point, new_entry, new_entry_2])
-    return [True, data_sequence, support_point]  
+    support_line = pd.concat([support_line, new_entry, new_entry_2])
+
+    new_entry_3 = pd.Series(data_sequence.iloc[absolute_maximum[1]][predefined_type_of_price], index=data_sequence.iloc[[absolute_maximum[1]]].index, name='Close')
+    new_entry_4 = pd.Series(data_sequence.iloc[-1][predefined_type_of_price], index=new_date_2, name='Close')
+    diagonal_line = pd.concat([new_entry_3, new_entry_4])
+
+    #Comprobar que se cumple el objetivo del patrón.
+    objective = support[0] - (absolute_maximum[0] - support[0])
+
+
+    # for i in range(len(data_sequence), len(data_sequence) * 2):
+    #     if i >= len(longer_data_sequence):
+    #         break
+    #     if any(x <= objective for x in longer_data_sequence.iloc[i:i+10][predefined_type_of_price]):
+    #         return [True, longer_data_sequence.iloc[:i + 10], [support_line, diagonal_line]]
+    #     if all(x > support[0] for x in longer_data_sequence.iloc[i:i+10][predefined_type_of_price]):
+    #         return [False, longer_data_sequence.iloc[:i + 10], [support_line, diagonal_line]]
+        
+    limit = len(data_sequence) * 2
+    if limit > len(longer_data_sequence):
+        limit = len(longer_data_sequence)-1
+    if any(x <= objective for x in longer_data_sequence.iloc[len(data_sequence):limit][predefined_type_of_price]):
+        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+    else:
+        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+    
+    #return [True, data_sequence,[support_line,data_sequence.iloc[local_maxs][predefined_type_of_price]]]
+    #return [True, data_sequence, [support_line, diagonal_line]]
+    print("No se ha cumplido el objetivo del patrón")
+    return None
+
 
 def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
     """Calculates the tendency for a ascending triangle pattern

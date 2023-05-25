@@ -5,7 +5,7 @@ import sys
 import tendencyCalculator as tc
 import matplotlib.pyplot as plt
 
-WINDOW_SIZE = 130
+WINDOW_SIZE = 200
 
 """
 Main file for programme. This script manages user input and executes the highest-level functions

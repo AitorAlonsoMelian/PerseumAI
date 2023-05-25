@@ -251,7 +251,11 @@ class ShowPatternsWindow:
             df2 = pattern.points
             #print(df2.info())
             if pattern.points is not None:
-                plot1.plot(df2)
+                if (isinstance(pattern.points, list)):
+                    plot1.plot(df2[0])
+                    plot1.plot(df2[1])
+                else:  
+                    plot1.plot(df2)
             fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
             canvas = FigureCanvasTkAgg(fig, master=temp_frame)
             canvas.draw()

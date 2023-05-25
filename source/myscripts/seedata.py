@@ -14,8 +14,8 @@ FONT = 'Raleway'
 BUTTON_BG = '#0C60DB'
 MAIN_BG = "#20385C"
 PATTERNS_FILE_PATH = 'patterns/'
-PATTERN_TO_SHOW = 'head_and_shoulders'
-TOGGLE_SMA = True
+PATTERN_TO_SHOW = 'descending_triangle'
+TOGGLE_SMA = False
 SMA_WINDOW_SIZE = 3
 
 def getData():
