@@ -347,7 +347,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
             but it ends where the tendency was determined
     """
     support = [BIG_NUMBER, None]
-    for i in range(len(data_sequence)):
+    for i in range(int(len(data_sequence)*(2/3))):
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if day_value < support[0]:
             support[0] = day_value
@@ -393,28 +393,37 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     # Crear la pendiente de la diagonal P(X,Y) = (indice,valor) P1 = (Maximo absoluto), P2 = (Ultimo valor del patron)
     m = (data_sequence.iloc[absolute_maximum[1]][predefined_type_of_price] - data_sequence.iloc[-1][predefined_type_of_price] )/(absolute_maximum[1] - (len(data_sequence)-1))
     b =  absolute_maximum[0] - m * absolute_maximum[1]
-    # Escribir en un fichero de texto para ver el resultao :)
+    intersection = None
     for i in range(absolute_maximum[1], len(data_sequence)):
         if data_sequence.iloc[i][predefined_type_of_price] / (m * i + b) > 1.01:
             print("Los valores se pasan demasiado de la diagonal (Por arriba)")
             return None
+        if ((m * i + b) / support[0]) < 1.01 and ((m * i + b) / support[0]) > 0.99:
+            intersection = i
 
     # Se crea la línea de soporte y la línea diagonal
     support_line = longer_data_sequence.iloc[[support[1]]][predefined_type_of_price]
 
     new_date = pd.to_datetime(data_sequence.iloc[[0]].index)
     new_entry = pd.Series(support_line.iloc[0], index=new_date, name='Close')
-    new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
+    if intersection is None:
+        new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
+    else:
+        print("Intersection: " + str(intersection))
+        new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
     new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 
     support_line = pd.concat([support_line, new_entry, new_entry_2])
 
     new_entry_3 = pd.Series(data_sequence.iloc[absolute_maximum[1]][predefined_type_of_price], index=data_sequence.iloc[[absolute_maximum[1]]].index, name='Close')
-    new_entry_4 = pd.Series(data_sequence.iloc[-1][predefined_type_of_price], index=new_date_2, name='Close')
+    if intersection is None:
+        new_entry_4 = pd.Series(data_sequence.iloc[-1][predefined_type_of_price], index=new_date_2, name='Close')
+    else:
+        new_entry_4 = pd.Series(data_sequence.iloc[intersection][predefined_type_of_price], index=new_date_2, name='Close')
     diagonal_line = pd.concat([new_entry_3, new_entry_4])
 
     #Comprobar que se cumple el objetivo del patrón.
-    objective = support[0] - (absolute_maximum[0] - support[0])
+    objective = support[0] - ((absolute_maximum[0] - support[0])*0.75)
 
 
     # for i in range(len(data_sequence), len(data_sequence) * 2):
@@ -433,10 +442,6 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     else:
         return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
     
-    #return [True, data_sequence,[support_line,data_sequence.iloc[local_maxs][predefined_type_of_price]]]
-    #return [True, data_sequence, [support_line, diagonal_line]]
-    print("No se ha cumplido el objetivo del patrón")
-    return None
 
 
 def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
