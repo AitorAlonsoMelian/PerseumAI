@@ -26,7 +26,7 @@ class LandingWindow:
     def __init__(self, master):
         """Definition of constructor for landing page"""
         self.master = master
-        self.master.geometry('800x600')
+        self.master.geometry('1000x600')
         self.master.configure(bg="#20385C")
         self.master.title('PerseumAI')
         self.frame = Frame(self.master, width=500, height=300, bg=MAIN_BG)
@@ -50,7 +50,7 @@ class MenuWindow:
     def __init__(self, master):
         self.master = master
         self.companies = None
-        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Ascending Triangle', 'Descending Triangle']
+        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Ascending Triangle', 'Descending Triangle', 'Inverse H&S']
         self.selected_types = []
         self.file_name = ''
 
@@ -113,6 +113,8 @@ class MenuWindow:
                     selected_types_set.add('ascending_triangle')
                 elif pattern_type['type'] == 'Descending Triangle':
                     selected_types_set.add('descending_triangle')
+                elif pattern_type['type'] == 'Inverse H&S':
+                    selected_types_set.add('inv_head_and_shoulders')
         patterns_dictionary = pattern_utils.loadPatterns(15, selected_types_set)
         historic_results = []
         current_results = []

@@ -14,6 +14,8 @@ def findPatternTendency(data_sequence, longer_data_sequence, type):
         return findDoubleBottomTendency(data_sequence, longer_data_sequence)
     if type == 'head_and_shoulders':
         return findHeadAndShouldersTendency(data_sequence, longer_data_sequence)
+    if type == 'inv_head_and_shoulders':
+        return findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence)
     if type == 'descending_triangle':
         return findDescendingTriangleTendency(data_sequence, longer_data_sequence)
     else:
@@ -232,13 +234,10 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
 
 
     if first_top[1] == None or second_top[1] == None or third_top[1] == None:
-        print("1")
         return None #No se encontró alguno de los 3 techos
     if first_top[1] > second_top[1] and first_top[1] > third_top[1]:
-        print("2")
         return None # La cabeza no está en medio
     if first_top[1] < second_top[1] and first_top[1] < third_top[1]:
-        print("3")
         return None # La cabeza no está en medio
 
     support = [BIG_NUMBER, None]
@@ -274,18 +273,14 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     second_top_to_support_distance = second_top[0] - support[0]
     third_top_to_support_distance = third_top[0] - support[0]
     if third_top_to_support_distance > second_top_to_support_distance and second_top_to_support_distance < third_top_to_support_distance * 2 / 3:
-        print("4")
         return None
     if second_top_to_support_distance > third_top_to_support_distance and third_top_to_support_distance < second_top_to_support_distance * 2 / 3:
-        print("5")
         return None
     if first_top_to_support_distance * 0.85 < second_top_to_support_distance or first_top_to_support_distance * 0.85 < third_top_to_support_distance:
-        print("5.5")
         return None
     
     # Comprobar la altura entre los suelos y la cabeza
     if not (second_top_support[0]/third_top_support[0] < 1.02 and second_top_support[0]/third_top_support[0] > 0.98):
-        print("9")
         return None
 
 
@@ -310,13 +305,11 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         i += 1
 
     if breaks_support_from_left[1] is None or breaks_support_from_right[1] is None: # Comprobar que se rompe la linea de apoyo
-        print("6")
         return None # Pattern\'s support not broken
     #Una vez rompe el patron, debemos averiguar en que direccion
 
     pattern_width = breaks_support_from_right[1] - breaks_support_from_left[1]
     if pattern_width < 12:
-        print("7")
         return None # Patrón demasiado pequeño
 
     average_height = abs(((first_top[0] + second_top[0]) / 2) - support[0])
@@ -333,9 +326,127 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
                 return [True, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
                 #return [True, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
     else:
-        print("8")
         return None
-    
+
+def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
+    """Calculates the tendency for a head and shoulders pattern  
+
+        Args:  
+            data_sequence (dataframe): dataframe representing the pattern
+            longer_data_sequence (dataframe): dataframe representing the pattern but ends on the day the search is made  
+        Return:  
+            tendency (Pair[]): first element for True, False or None, and secondthird_top element for the specific dataframe containing the pattern
+            but it ends where the tendency was determined
+    """
+    first_bottom = [BIG_NUMBER, None] #index 0 representa el valor y el index 1 representa la posicion dentro del dataframe
+    second_bottom = [BIG_NUMBER, None]
+    third_bottom = [BIG_NUMBER, None]
+    #aux = 0
+    #print(data_sequence)
+    print("\nEmpezando tendencia")
+    for i in range(len(data_sequence) - 3): #Buscar 3 bottoms
+        day_value = data_sequence.iloc[i][predefined_type_of_price]
+        if i > 1 and all(x >= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x >= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un minimo
+            relative_minimum = day_value
+            if relative_minimum < first_bottom[0]: 
+                third_bottom = second_bottom
+                second_bottom = first_bottom
+                first_bottom = [relative_minimum, i]
+            elif relative_minimum < second_bottom[0] and i not in range(first_bottom[1] - 5, first_bottom[1] + 5):
+                third_bottom = second_bottom
+                second_bottom = [relative_minimum, i]
+            elif relative_minimum < third_bottom[0] and i not in range(first_bottom[1] - 5, first_bottom[1] + 5):
+                third_bottom = [relative_minimum, i]
+
+    print("First bottom: " + str(first_bottom) + " Second bottom: " + str(second_bottom) + " Third bottom: " + str(third_bottom))
+    if first_bottom[1] == None or second_bottom[1] == None or third_bottom[1] == None:
+        print("1")
+        return None #No se encontró alguno de los 3 suelos
+    if first_bottom[1] > second_bottom[1] and first_bottom[1] > third_bottom[1]:
+        print("2")
+        return None # La cabeza no está en medio
+    if first_bottom[1] < second_bottom[1] and first_bottom[1] < third_bottom[1]:
+        print("3")
+        return None # La cabeza no está en medio
+    print("Test 1 superado")
+    resistance = [0, None]
+    second_shoulder_resistance = [0, None]
+    third_shoulder_resistance = [0, None]
+    if second_bottom[1] > third_bottom[1]:
+        rangeofsearch = range(third_bottom[1], second_bottom[1])
+    else:
+        rangeofsearch = range(second_bottom[1], third_bottom[1])
+    for i in rangeofsearch: #Busqueda de la linea de resistencia
+        current_value = data_sequence.iloc[i][predefined_type_of_price]
+        if current_value > resistance[0]:
+            resistance[0] = current_value
+            resistance[1] = i
+        if i < first_bottom[1] and current_value > third_shoulder_resistance[0]:
+            third_shoulder_resistance[0] = current_value
+            third_shoulder_resistance[1] = i
+        if i > first_bottom[1] and current_value > second_shoulder_resistance[0]:
+            second_shoulder_resistance[0] = current_value
+            second_shoulder_resistance[1] = i
+
+    # Se comprueba que los picos están a alturas similares
+    first_bottom_to_resistance_distance = resistance[0] - first_bottom[0]
+    second_bottom_to_resistance_distance = resistance[0] - second_bottom[0]
+    third_bottom_to_resistance_distance = resistance[0] - third_bottom[0]
+    if third_bottom_to_resistance_distance > second_bottom_to_resistance_distance and second_bottom_to_resistance_distance < third_bottom_to_resistance_distance * 2 / 3:
+        return None
+    if second_bottom_to_resistance_distance > third_bottom_to_resistance_distance and third_bottom_to_resistance_distance < second_bottom_to_resistance_distance * 2 / 3:
+        return None
+    if first_bottom_to_resistance_distance * 0.85 < second_bottom_to_resistance_distance or first_bottom_to_resistance_distance * 0.85 < third_bottom_to_resistance_distance:
+        return None
+    print("Test 2 superado")
+    # Comprobar la altura entre los suelos y la cabeza
+    if not (second_shoulder_resistance[0]/third_shoulder_resistance[0] < 1.04 and second_shoulder_resistance[0]/third_shoulder_resistance[0] > 0.96):
+        return None
+    print("Test 3 superado")
+
+    #Confirmar que en rompe por la linea de apoyo en ambos lados
+    breaks_support_from_left = [False, None]
+    breaks_support_from_right = [False, None]
+    i = first_bottom[1]
+    while i >= 0 and not breaks_support_from_left[0]:
+        current_value_left = data_sequence.iloc[i][predefined_type_of_price]
+        if current_value_left > resistance[0]:
+            breaks_support_from_left[0] = True
+            breaks_support_from_left[1] = i
+        i -= 1
+
+    # Hacer esto pero en longer dataset
+    i = first_bottom[1]
+    while i < len(data_sequence) and not breaks_support_from_right[0]:
+        current_value_right = data_sequence.iloc[i][predefined_type_of_price]
+        if current_value_right > resistance[0]:
+            breaks_support_from_right[0] = True
+            breaks_support_from_right[1] = i
+        i += 1
+
+    if breaks_support_from_left[1] is None or breaks_support_from_right[1] is None: # Comprobar que se rompe la linea de apoyo
+        return None # Pattern\'s support not broken
+    #Una vez rompe el patron, debemos averiguar en que direccion
+
+    pattern_width = breaks_support_from_right[1] - breaks_support_from_left[1]
+    if pattern_width < 12:
+        return None # Patrón demasiado pequeño
+    print("Test 4 superado")
+    average_height = abs(((first_bottom[0] + second_bottom[0] + third_bottom[0]) / 3) - resistance[0])
+    objective = resistance[0] + average_height
+    if pattern_width:
+        for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width):
+            if i+2 >= len(longer_data_sequence):
+                break
+            current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
+            if all(x < resistance[0] for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
+                return [False, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+            if all(x > objective for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
+                return [True, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+    else:
+        return None
+
+
 def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     """Calculates the tendency for a descending triangle pattern
 
@@ -457,3 +568,4 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
 
     print()
     return None
+
