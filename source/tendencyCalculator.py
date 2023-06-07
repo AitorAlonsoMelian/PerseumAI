@@ -341,9 +341,6 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     first_bottom = [BIG_NUMBER, None] #index 0 representa el valor y el index 1 representa la posicion dentro del dataframe
     second_bottom = [BIG_NUMBER, None]
     third_bottom = [BIG_NUMBER, None]
-    #aux = 0
-    #print(data_sequence)
-    print("\nEmpezando tendencia")
     for i in range(len(data_sequence) - 3): #Buscar 3 bottoms
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if i > 1 and all(x >= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x >= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un minimo
@@ -358,17 +355,12 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
             elif relative_minimum < third_bottom[0] and i not in range(first_bottom[1] - 5, first_bottom[1] + 5):
                 third_bottom = [relative_minimum, i]
 
-    print("First bottom: " + str(first_bottom) + " Second bottom: " + str(second_bottom) + " Third bottom: " + str(third_bottom))
     if first_bottom[1] == None or second_bottom[1] == None or third_bottom[1] == None:
-        print("1")
         return None #No se encontró alguno de los 3 suelos
     if first_bottom[1] > second_bottom[1] and first_bottom[1] > third_bottom[1]:
-        print("2")
         return None # La cabeza no está en medio
     if first_bottom[1] < second_bottom[1] and first_bottom[1] < third_bottom[1]:
-        print("3")
         return None # La cabeza no está en medio
-    print("Test 1 superado")
     resistance = [0, None]
     second_shoulder_resistance = [0, None]
     third_shoulder_resistance = [0, None]
@@ -398,11 +390,9 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None
     if first_bottom_to_resistance_distance * 0.85 < second_bottom_to_resistance_distance or first_bottom_to_resistance_distance * 0.85 < third_bottom_to_resistance_distance:
         return None
-    print("Test 2 superado")
     # Comprobar la altura entre los suelos y la cabeza
     if not (second_shoulder_resistance[0]/third_shoulder_resistance[0] < 1.04 and second_shoulder_resistance[0]/third_shoulder_resistance[0] > 0.96):
         return None
-    print("Test 3 superado")
 
     #Confirmar que en rompe por la linea de apoyo en ambos lados
     breaks_support_from_left = [False, None]
@@ -431,7 +421,6 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     pattern_width = breaks_support_from_right[1] - breaks_support_from_left[1]
     if pattern_width < 12:
         return None # Patrón demasiado pequeño
-    print("Test 4 superado")
     average_height = abs(((first_bottom[0] + second_bottom[0] + third_bottom[0]) / 3) - resistance[0])
     objective = resistance[0] + average_height
     if pattern_width:
