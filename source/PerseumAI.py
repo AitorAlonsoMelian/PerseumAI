@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+from tkcalendar import Calendar, DateEntry
 from PIL import Image, ImageTk
 from matplotlib.pyplot import text, title
 from matplotlib.figure import Figure
@@ -13,6 +14,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 import re
 import os
 import pandas as pd
+import datetime
 
 """Code for GUI of Perseum AI"""
 
@@ -20,13 +22,14 @@ FG = '#ffffff'
 FONT = 'Raleway'
 BUTTON_BG = '#0C60DB'
 MAIN_BG = "#20385C"
+RED = '#FF0000'
 
 class LandingWindow:
     """Landing window where the program starts"""
     def __init__(self, master):
         """Definition of constructor for landing page"""
         self.master = master
-        self.master.geometry('1000x600')
+        self.master.geometry('1000x800')
         self.master.configure(bg="#20385C")
         self.master.title('PerseumAI')
         self.frame = Frame(self.master, width=500, height=300, bg=MAIN_BG)
@@ -62,13 +65,19 @@ class MenuWindow:
             pattern_type_dict = {
                 'type': type,
                 'value': value,
-                'button': Checkbutton(self.types_frame, text=type, height=1, width=14, variable=value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) #, font=FONT, variable=value, bg=MAIN_BG, fg=FG, activebackground="#69AAF5", highlightthickness=0
+                'button': Checkbutton(self.types_frame, text=type, height=1, width=15, variable=value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) #, font=FONT, variable=value, bg=MAIN_BG, fg=FG, activebackground="#69AAF5", highlightthickness=0
             }
             pattern_type_dict['button'].pack(side=LEFT, pady=15)
             self.selected_types.append(pattern_type_dict)
         self.empty_label = Label(self.frame, text='\n')
-        self.year_label = Label(self.frame, text='Year to start counting from', font=FONT, bg=MAIN_BG, fg=FG)
-        self.year_entry = Entry(self.frame)
+        self.Dates = Frame(self.frame, bg=MAIN_BG)
+        self.DatesText = Frame(self.frame, bg=MAIN_BG)
+        self.InitialText = Label(self.DatesText, text='Initial date', font=FONT, bg=MAIN_BG, fg=FG)
+        self.EndingText = Label(self.DatesText, text='EndingDate', font=FONT, bg=MAIN_BG, fg=FG)
+        self.InitialDate = DateEntry(self.Dates)
+        self.EndingDate = DateEntry(self.Dates)
+        self.window_label = Label(self.frame, text='Window size', font=FONT, bg=MAIN_BG, fg=FG)
+        self.window_entry = Entry(self.frame)
         self.open_file_button = Button(self.frame, text = 'Open file', width = 25, command = self.openTxt, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
         self.selected_file = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
         #self.warning_file_label = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
@@ -79,9 +88,15 @@ class MenuWindow:
         self.quit_button = Button(self.frame, text = 'Quit', width = 25, command = self.closeWindow, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
        
         self.patterns_type.pack()
-        self.year_label.pack()
         self.types_frame.pack()
-        self.year_entry.pack(pady=5)
+        self.window_label.pack()
+        self.window_entry.pack(pady=5)
+        self.InitialText.pack(side=LEFT, padx=25)
+        self.EndingText.pack()
+        self.DatesText.pack()
+        self.InitialDate.pack(side=LEFT, padx=20)
+        self.EndingDate.pack()
+        self.Dates.pack(pady=5)
         self.open_file_button.pack(pady=5)
         self.selected_file.pack()
         #self.warning_file_label.pack()
@@ -92,14 +107,14 @@ class MenuWindow:
 
         self.frame.pack(fill=BOTH, expand=True)
         self.frame.place(relx=.5, rely=.5, anchor='c')
-
+        
     def runProgram(self):
         """Execute the back-end program with the parametes given by the user"""
         if self.companies == None:
             self.selected_file.configure(text='Please select a file')
             return
-        if not self.year_entry.get():
-            return
+        #if not self.year_entry.get():
+        #    return
         selected_types_set = set()
         for pattern_type in self.selected_types:
             if (pattern_type['value'].get()):
@@ -118,10 +133,10 @@ class MenuWindow:
         patterns_dictionary = pattern_utils.loadPatterns(15, selected_types_set)
         historic_results = []
         current_results = []
-        if not re.search("^\d{4}$", self.year_entry.get()):
+        if not isinstance(self.InitialDate.get_date(), datetime.date) and not isinstance(self.EndingDate.get_date(), datetime.date):
             raise Exception('Enter a valid year format %dddd')
         for company in self.companies:
-            historic_results = historic_results + mn.trainHistoricDatabase(company, self.year_entry.get(), patterns_dictionary)
+            historic_results = historic_results + mn.trainHistoricDatabase(company, patterns_dictionary, self.InitialDate.get_date(), self.EndingDate.get_date(), int(self.window_entry.get()))
             current_results = current_results + mn.findCurrentPatterns(company, patterns_dictionary, self.intensive_search_value.get())
         tendency_results = pattern_utils.calculateTendencyProbability(historic_results, selected_types_set)
         self.results_window = Toplevel(self.master)

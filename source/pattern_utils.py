@@ -233,7 +233,7 @@ def calculateSimpleMovingAverage(dataframe, window_size):
     dataframe['SMA'] = dataframe['Close'].rolling(window=window_size).mean()
     return dataframe
 
-#Create a function that calculates the simple moving average of a given Dictionary and window size that does not use the calculateSimpleMovingAverage function
+# A function that calculates the simple moving average of a given Dictionary and window size
 def calculateDictSimpleMovingAverage(patterns_dict, window_size):
     """Calculate the simple moving average for a given dictionary and window size
 
@@ -244,16 +244,12 @@ def calculateDictSimpleMovingAverage(patterns_dict, window_size):
             patterns_dict (Dict{}): dictionary containing the prices and the moving average
     """
     results = dict()
-    #print("\n\n\n\nTest\n\n\n\n")
     for key, vector in patterns_dict.items():
         for i in range(len(vector)):
             vector[i] = calculateArraySimpleMovingAverage(vector[i], window_size)
-    # print("\n\n\n\n")
-    # print(patterns_dict)
-    # print("\n\n\n\n")
     return patterns_dict
 
-#A function that calculates simple moving average of an array
+# A function that calculates simple moving average of an array
 def calculateArraySimpleMovingAverage(array, window_size):
     """Calculate the simple moving average for a given array and window size
 

@@ -70,14 +70,14 @@ def findHistoricPatterns(window_width, company_data, patterns_dictionary, compan
     #print("Company Data: " + company_data.to_string())
     while i < len(company_data) - window_width - 1:
         right_window_index = i + window_width
-        #print("I: " + str(i) + " Right: " + str(right_window_index) + " Window: " + str(right_window_index - i))
+        print("I: " + str(i) + " Right: " + str(right_window_index) + " Window: " + str(right_window_index - i))
         if right_window_index >= len(company_data):
             break
         sliced_dataframe = company_data.iloc[i:right_window_index]
         normalized_vector = nu.normalizeVector(sliced_dataframe['SMA'].tolist())
         new_pattern_type, best_distance_found = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary)
         if new_pattern_type != 'rest_normalized' and new_pattern_type != '' and best_distance_found < 40:
-            left_index, right_index = pattern_utils.enhanceDataframeDistancesMean(best_distance_found, new_pattern_type, sliced_dataframe['Close'].tolist(), patterns_dictionary, [1,2,3,4])
+            left_index, right_index = pattern_utils.enhanceDataframeDistancesMean(best_distance_found, new_pattern_type, sliced_dataframe['SMA'].tolist(), patterns_dictionary, [1,2,3,4])
             dataframe_segment = sliced_dataframe[left_index:right_index] #Esto sin ventana mejorada
             longer_dataframe = company_data[i + left_index:] #Quitar left_index si no se usa enhanced dataframe
             ##########################################################

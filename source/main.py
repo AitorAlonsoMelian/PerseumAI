@@ -13,7 +13,7 @@ Main file for programme. This script manages user input and executes the highest
 
 #company_json = get_company_data.getCompanyData('AAP')
 #company_dataframe = one_day_pattern_search.createMorningDataframeFromJson('2022-04-01', company_json)
-def trainHistoricDatabase(company, year, patterns_dictionary):
+def trainHistoricDatabase(company, patterns_dictionary, initial_date, final_date, window_size = WINDOW_SIZE):
     """
     Reads the database and trains the data starting from the given year  
 
@@ -23,10 +23,10 @@ def trainHistoricDatabase(company, year, patterns_dictionary):
     Returns:  
         patterns_found (List[Pattern]): A list containing all the patterns that were found
     """
-    company_dataframe = get_company_data.getCompanyDataWithYahoo(company, year + '-01-01')
+    company_dataframe = get_company_data.getCompanyDataWithYahoo(company, initial_date.strftime("%Y-%m-%d"), final_date.strftime("%Y-%m-%d"))
     if company_dataframe.empty:
         exit("Dataframe vacío")
-    patterns_found = pattern_search.findHistoricPatterns(WINDOW_SIZE, company_dataframe, patterns_dictionary, company)
+    patterns_found = pattern_search.findHistoricPatterns(window_size, company_dataframe, patterns_dictionary, company)
     #plt.show()
     average_tendency = pattern_utils.calculateTendencyProbability(patterns_found, patterns_dictionary.keys())
     return patterns_found

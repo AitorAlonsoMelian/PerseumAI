@@ -18,6 +18,8 @@ def findPatternTendency(data_sequence, longer_data_sequence, type):
         return findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence)
     if type == 'descending_triangle':
         return findDescendingTriangleTendency(data_sequence, longer_data_sequence)
+    if type == 'ascending_triangle':
+        return findAscendingTriangleTendency(data_sequence, longer_data_sequence)
     else:
         raise Exception('Pattern type not found')
 
@@ -458,7 +460,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     local_maxs = []
     absolute_maximum = [0, None]
     for i in range(len(data_sequence) - 1):
-        # Comprobar si es un mínimo local
+        # Comprobar si es un máximo local
         if data_sequence.iloc[i][predefined_type_of_price] < data_sequence.iloc[i + 1][predefined_type_of_price] and data_sequence.iloc[i][predefined_type_of_price] < data_sequence.iloc[i - 1][predefined_type_of_price]:
             if (data_sequence.iloc[i][predefined_type_of_price] / support[0]) > 0.98 and (data_sequence.iloc[i][predefined_type_of_price] / support[0]) < 1.02:
                 times_near_support += 1
@@ -472,8 +474,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
         return None
     # Comprobar que el máximo absoluto está en el primer tercio del patrón
     if absolute_maximum[1] > len(data_sequence) / 3:
-        print("Maximo absoluto demasiado lejos del inicio del patrón")
-        return None
+        return None 
     # Comprobar que los picos son decrecientes
     for i in range(len(local_maxs)):
         if local_maxs[i] <= absolute_maximum[1]:
@@ -483,11 +484,9 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
         
     # Comprobar si el triangulo está cerrado (O próximo a cerrarse)
     if (data_sequence.iloc[-1][predefined_type_of_price] / support[0]) > 1.03:
-        print("Triangulo no cerrado")
         return None
     pattern_height = absolute_maximum[0] - support[0]
-    if (data_sequence.iloc[-1][predefined_type_of_price] - support[0]) > pattern_height * 0.25:
-        print("Triangulo no cerrado 2")
+    if (data_sequence.iloc[-1][predefined_type_of_price] - support[0]) > pattern_height * 0.20:
         return None
     
     # Crear la pendiente de la diagonal P(X,Y) = (indice,valor) P1 = (Maximo absoluto), P2 = (Ultimo valor del patron)
@@ -496,7 +495,6 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     intersection = None
     for i in range(absolute_maximum[1], len(data_sequence)):
         if data_sequence.iloc[i][predefined_type_of_price] / (m * i + b) > 1.01:
-            print("Los valores se pasan demasiado de la diagonal (Por arriba)")
             return None
         if ((m * i + b) / support[0]) < 1.01 and ((m * i + b) / support[0]) > 0.99:
             intersection = i
@@ -523,16 +521,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     diagonal_line = pd.concat([new_entry_3, new_entry_4])
 
     #Comprobar que se cumple el objetivo del patrón.
-    objective = support[0] - ((absolute_maximum[0] - support[0])*0.75)
-
-
-    # for i in range(len(data_sequence), len(data_sequence) * 2):
-    #     if i >= len(longer_data_sequence):
-    #         break
-    #     if any(x <= objective for x in longer_data_sequence.iloc[i:i+10][predefined_type_of_price]):
-    #         return [True, longer_data_sequence.iloc[:i + 10], [support_line, diagonal_line]]
-    #     if all(x > support[0] for x in longer_data_sequence.iloc[i:i+10][predefined_type_of_price]):
-    #         return [False, longer_data_sequence.iloc[:i + 10], [support_line, diagonal_line]]
+    objective = support[0] - ((absolute_maximum[0] - support[0])*0.70)
         
     limit = len(data_sequence) * 2
     if limit > len(longer_data_sequence):
@@ -555,6 +544,85 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
             but it ends where the tendency was determined
     """
 
-    print()
-    return None
+    resistance = [0, None]
+    for i in range(int(len(data_sequence)*(2/3))):
+        day_value = data_sequence.iloc[i][predefined_type_of_price]
+        if day_value > resistance[0]:
+            resistance[0] = day_value
+            resistance[1] = i
 
+    times_near_resistance = 0
+
+    local_mins = []
+    absolute_minimum = [BIG_NUMBER, None]
+    for i in range(len(data_sequence) - 1):
+        # Comprobar si es un máximo local
+        if data_sequence.iloc[i][predefined_type_of_price] > data_sequence.iloc[i + 1][predefined_type_of_price] and data_sequence.iloc[i][predefined_type_of_price] > data_sequence.iloc[i - 1][predefined_type_of_price]:
+            if (data_sequence.iloc[i][predefined_type_of_price] / resistance[0]) > 0.98 and (data_sequence.iloc[i][predefined_type_of_price] / resistance[0]) < 1.02:
+                times_near_resistance += 1
+        if all(x > data_sequence.iloc[i][predefined_type_of_price] for x in data_sequence.iloc[i-3:i][predefined_type_of_price]) and all (x > data_sequence.iloc[i][predefined_type_of_price] for x in data_sequence.iloc[i+1:i+4][predefined_type_of_price]):
+            local_mins.append(i)
+        if data_sequence.iloc[i][predefined_type_of_price] < absolute_minimum[0]:
+            absolute_minimum = [data_sequence.iloc[i][predefined_type_of_price], i]
+
+    #  Comprobar que el precio se acerca al soporte al menos 3 veces
+    if times_near_resistance < 3:
+        return None
+    # Comprobar que el máximo absoluto está en el primer tercio del patrón
+    if absolute_minimum[1] > len(data_sequence) / 3:
+        return None 
+    # Comprobar que los picos son decrecientes
+    for i in range(len(local_mins)):
+        if local_mins[i] <= absolute_minimum[1]:
+            continue
+        if data_sequence.iloc[local_mins[i]][predefined_type_of_price] * 1.04 < data_sequence.iloc[local_mins[i-1]][predefined_type_of_price]: # Si un pico es mayor que el anterior en un 4% o más se descarta
+            return None
+        
+    # Comprobar si el triangulo está cerrado (O próximo a cerrarse)
+    if (data_sequence.iloc[-1][predefined_type_of_price] / resistance[0]) < 0.97:
+        return None
+    pattern_height = resistance[0] - absolute_minimum[0]
+    if (resistance[0] - data_sequence.iloc[-1][predefined_type_of_price]) > pattern_height * 0.20:
+        return None
+    
+    # Crear la pendiente de la diagonal P(X,Y) = (indice,valor) P1 = (Mínimo absoluto), P2 = (Ultimo valor del patron)
+    m = (data_sequence.iloc[absolute_minimum[1]][predefined_type_of_price] - data_sequence.iloc[-1][predefined_type_of_price] )/(absolute_minimum[1] - (len(data_sequence)-1))
+    b =  absolute_minimum[0] - m * absolute_minimum[1]
+    intersection = None
+    for i in range(absolute_minimum[1], len(data_sequence)):
+        if data_sequence.iloc[i][predefined_type_of_price] / (m * i + b) < 0.99:
+            return None
+        if ((m * i + b) / resistance[0]) < 1.01 and ((m * i + b) / resistance[0]) > 0.99:
+            intersection = i
+
+    # Se crea la línea de soporte y la línea diagonal
+    support_line = longer_data_sequence.iloc[[resistance[1]]][predefined_type_of_price]
+
+    new_date = pd.to_datetime(data_sequence.iloc[[0]].index)
+    new_entry = pd.Series(support_line.iloc[0], index=new_date, name='Close')
+    if intersection is None:
+        new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
+    else:
+        print("Intersection: " + str(intersection))
+        new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
+    new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
+
+    support_line = pd.concat([support_line, new_entry, new_entry_2])
+
+    new_entry_3 = pd.Series(data_sequence.iloc[absolute_minimum[1]][predefined_type_of_price], index=data_sequence.iloc[[absolute_minimum[1]]].index, name='Close')
+    if intersection is None:
+        new_entry_4 = pd.Series(data_sequence.iloc[-1][predefined_type_of_price], index=new_date_2, name='Close')
+    else:
+        new_entry_4 = pd.Series(data_sequence.iloc[intersection][predefined_type_of_price], index=new_date_2, name='Close')
+    diagonal_line = pd.concat([new_entry_3, new_entry_4])
+
+    #Comprobar que se cumple el objetivo del patrón.
+    objective = resistance[0] + ((resistance[0] - absolute_minimum[0])*0.70)
+        
+    limit = len(data_sequence) * 2
+    if limit > len(longer_data_sequence):
+        limit = len(longer_data_sequence)-1
+    if any(x >= objective for x in longer_data_sequence.iloc[len(data_sequence):limit][predefined_type_of_price]):
+        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+    else:
+        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
