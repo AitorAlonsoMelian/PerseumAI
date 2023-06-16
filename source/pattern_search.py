@@ -70,7 +70,7 @@ def findHistoricPatterns(window_width, company_data, patterns_dictionary, compan
     #print("Company Data: " + company_data.to_string())
     while i < len(company_data) - window_width - 1:
         right_window_index = i + window_width
-        print("I: " + str(i) + " Right: " + str(right_window_index) + " Window: " + str(right_window_index - i))
+        #print("I: " + str(i) + " Right: " + str(right_window_index) + " Window: " + str(right_window_index - i))
         if right_window_index >= len(company_data):
             break
         sliced_dataframe = company_data.iloc[i:right_window_index]

@@ -15,6 +15,7 @@ import re
 import os
 import pandas as pd
 import datetime
+import threading
 
 """Code for GUI of Perseum AI"""
 
@@ -56,6 +57,7 @@ class MenuWindow:
         pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Ascending Triangle', 'Descending Triangle', 'Inverse H&S']
         self.selected_types = []
         self.file_name = ''
+        self.isRunning = False
 
         self.frame = Frame(self.master, height=2000, width=500, bg=MAIN_BG)
         self.patterns_type = Label(self.frame, text='Choose which patterns to find', font=(FONT, 18), fg=FG, bg=MAIN_BG, highlightthickness=0)
@@ -77,16 +79,18 @@ class MenuWindow:
         self.InitialDate = DateEntry(self.Dates)
         self.EndingDate = DateEntry(self.Dates)
         self.window_label = Label(self.frame, text='Window size', font=FONT, bg=MAIN_BG, fg=FG)
-        self.window_entry = Entry(self.frame)
+        self.window_entry = Entry(self.frame, validate='key', validatecommand=(self.master.register(self.validateText), '%S'))
         self.open_file_button = Button(self.frame, text = 'Open file', width = 25, command = self.openTxt, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
         self.selected_file = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
         #self.warning_file_label = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
         self.intensive_search_frame = Frame(self.frame, bg=MAIN_BG)
         self.intensive_search_value = BooleanVar(self.intensive_search_frame)
         self.intensive_search_check = Checkbutton(self.intensive_search_frame, text='Intensive search mode', height=1, width=18, variable=self.intensive_search_value, font=FONT, bg="#69AAF5", activebackground="#69AAF5", highlightthickness=0, fg=MAIN_BG) 
-        self.run_button = Button(self.frame, text = 'Run', width = 25, command = self.runProgram, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
+        self.run_button = Button(self.frame, text = 'Run', width = 25, command = self.PreRunProgram, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
         self.quit_button = Button(self.frame, text = 'Quit', width = 25, command = self.closeWindow, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
-       
+        self.progressbar = ttk.Progressbar(self.frame, orient=HORIZONTAL, length=300, mode='determinate')
+        self.percentage = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
+            
         self.patterns_type.pack()
         self.types_frame.pack()
         self.window_label.pack()
@@ -105,6 +109,7 @@ class MenuWindow:
         self.run_button.pack(pady=(100,5))
         self.quit_button.pack()
 
+
         self.frame.pack(fill=BOTH, expand=True)
         self.frame.place(relx=.5, rely=.5, anchor='c')
         
@@ -113,8 +118,19 @@ class MenuWindow:
         if self.companies == None:
             self.selected_file.configure(text='Please select a file')
             return
-        #if not self.year_entry.get():
-        #    return
+        if int(self.window_entry.get()) < 80 :
+            self.selected_file.configure(text='Please enter a valid window size (Number >= 80)')
+            return
+        self.progressbar.pack(pady=20)
+        self.isRunning = True
+        if len(self.companies) == 1:
+            self.progressbar.configure(mode='indeterminate')
+            self.progressbar.start(10)
+        else:
+            self.progressbar.configure(maximum=len(self.companies))
+            self.percentage.pack(pady=5)
+            self.percentage.configure(text='0%')
+
         selected_types_set = set()
         for pattern_type in self.selected_types:
             if (pattern_type['value'].get()):
@@ -138,13 +154,33 @@ class MenuWindow:
         for company in self.companies:
             historic_results = historic_results + mn.trainHistoricDatabase(company, patterns_dictionary, self.InitialDate.get_date(), self.EndingDate.get_date(), int(self.window_entry.get()))
             current_results = current_results + mn.findCurrentPatterns(company, patterns_dictionary, self.intensive_search_value.get())
+            self.progressbar.step(1)
+            self.percentage.configure(text=str(int((self.progressbar['value']/self.progressbar['maximum'])*100)) + '%')
+            #print(round((self.progressbar['value']/self.progressbar['maximum'])*100, 0), '%')
         tendency_results = pattern_utils.calculateTendencyProbability(historic_results, selected_types_set)
+        self.isRunning = False
+        self.progressbar.stop()
         self.results_window = Toplevel(self.master)
         self.app = ResultsWindow(self.results_window, historic_results, current_results, tendency_results)
 
     def closeWindow(self):
         """End the program by closing the window"""
         self.master.destroy()
+
+    def PreRunProgram(self):
+        if self.isRunning:
+            print('Already running')
+            return
+        self.refresh()
+        threading.Thread(target=self.runProgram).start()
+
+    def refresh(self):
+        """Refresh the window"""
+        self.master.update()
+        self.master.after(5000, self.refresh)
+
+    def validateText(self, text):
+        return text.isdecimal()
 
     def openTxt(self):
         """Read the txt file chose by the user"""
