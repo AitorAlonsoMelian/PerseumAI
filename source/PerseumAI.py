@@ -30,7 +30,7 @@ class LandingWindow:
     def __init__(self, master):
         """Definition of constructor for landing page"""
         self.master = master
-        self.master.geometry('1000x800')
+        self.master.geometry('1100x800')
         self.master.configure(bg="#20385C")
         self.master.title('PerseumAI')
         self.frame = Frame(self.master, width=500, height=300, bg=MAIN_BG)
@@ -59,7 +59,7 @@ class MenuWindow:
         self.file_name = ''
         self.isRunning = False
 
-        self.frame = Frame(self.master, height=2000, width=500, bg=MAIN_BG)
+        self.frame = Frame(self.master, bg=MAIN_BG)
         self.patterns_type = Label(self.frame, text='Choose which patterns to find', font=(FONT, 18), fg=FG, bg=MAIN_BG, highlightthickness=0)
         self.types_frame = Frame(self.frame, height=200, bg=MAIN_BG)
         for type in pattern_types:
@@ -90,6 +90,9 @@ class MenuWindow:
         self.quit_button = Button(self.frame, text = 'Quit', width = 25, command = self.closeWindow, font=FONT, fg=FG, bg=BUTTON_BG, activebackground="#69AAF5")
         self.progressbar = ttk.Progressbar(self.frame, orient=HORIZONTAL, length=300, mode='determinate')
         self.percentage = Label(self.frame, text='', font=FONT, bg=MAIN_BG, fg=FG)
+        self.image_table = Image.open('./resources/images/Table.jpg')
+        self.image_table_2 = ImageTk.PhotoImage(self.image_table)
+        self.table = Label(self.frame, image=self.image_table_2)
             
         self.patterns_type.pack()
         self.types_frame.pack()
@@ -108,10 +111,11 @@ class MenuWindow:
         self.intensive_search_check.pack()
         self.run_button.pack(pady=(100,5))
         self.quit_button.pack()
+        self.table.place(relx=0.82, rely=0.3, anchor='c')
 
 
-        self.frame.pack(fill=BOTH, expand=True)
-        self.frame.place(relx=.5, rely=.5, anchor='c')
+        #self.frame.pack(fill=BOTH, expand=True)
+        self.frame.place(relx=.5, rely=.5, anchor='c', height=500, width=1100)
         
     def runProgram(self):
         """Execute the back-end program with the parametes given by the user"""
