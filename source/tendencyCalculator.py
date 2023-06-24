@@ -35,13 +35,9 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
     """
     first_top = [0, None] #index 0 representa el valor y el index 1 representa la posicion dentro del dataframe
     second_top = [0, None]
-    for i in range(len(data_sequence) - 1): #Buscar los dos techos
+    for i in range(len(data_sequence) - 3): #Buscar los dos techos
         day_value = data_sequence.iloc[i][predefined_type_of_price]
-        if i > 0:
-            previous_day_value = data_sequence.iloc[i - 1][predefined_type_of_price]
-        if i < len(data_sequence) - 1:
-            next_day_value = data_sequence.iloc[i + 1][predefined_type_of_price]
-        if i > 0 and previous_day_value < day_value and day_value > next_day_value: #hemos encontrado un maximo
+        if i > 1 and all(x <= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x <= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un maximo
             relative_maximum = day_value
             if relative_maximum > first_top[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
                 first_top = second_top
@@ -67,6 +63,8 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
         return None # Demasiada diferencia entre techos
     if second_top_to_resistance_distance > first_top_to_resistance_distance and first_top_to_resistance_distance < second_top_to_resistance_distance * 2 / 3:
         return None # Demasiada diferencia entre techos
+    if abs(first_top[1] - second_top[1]) < 5:
+        return None
 
     breaks_resistance_from_left = [False, None]
     breaks_resistance_from_right = [False, None]
@@ -100,14 +98,18 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
     objective = resistance[0] - average_height
 
     if pattern_width:
-        for i in range(breaks_resistance_from_right[1], breaks_resistance_from_right[1] + pattern_width * 2):
-            if i >= len(longer_data_sequence):
-                break
-            current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-            if current_value > resistance[0]:
-                return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
-            if current_value < objective:
-                return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+        # for i in range(breaks_resistance_from_right[1], breaks_resistance_from_right[1] + pattern_width * 2):
+        #     if i >= len(longer_data_sequence):
+        #         break
+        #     current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
+        #     if current_value > resistance[0]:
+        #         return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+        #     if current_value < objective:
+        #         return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+        if any(x < objective for x in longer_data_sequence.iloc[breaks_resistance_from_right[1]:breaks_resistance_from_right[1] + pattern_width][predefined_type_of_price]):
+            return [True, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+        else:
+            return [False, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
     else:
         return None #Significa que el valor no cruzo ningun limite
 
@@ -154,6 +156,8 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
         return None # Demasiada diferencia entre suelos
     if second_bottom_to_resistance_distance > first_bottom_to_resistance_distance and first_bottom_to_resistance_distance < second_bottom_to_resistance_distance * 2 / 3:
         return None # Demasiada diferencia entre suelos
+    if abs(first_bottom[1] - second_bottom[1]) < 5:
+        return None
 
     breaks_resistance_from_left = [False, None]
     breaks_resistance_from_right = [False, None]
@@ -211,18 +215,9 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     third_top = [0, None]
     #aux = 0
     #print(data_sequence)
-    for i in range(len(data_sequence) - 1): #Buscar 3 tops
+    for i in range(len(data_sequence) - 3): #Buscar 3 tops
         day_value = data_sequence.iloc[i][predefined_type_of_price]
-        if i > 1:
-            previous_previous_day_value = data_sequence.iloc[i - 2][predefined_type_of_price]
-            previous_day_value = data_sequence.iloc[i - 1][predefined_type_of_price]
-        if i < len(data_sequence) - 2:
-            #print("HELLO " + str(aux) + " i: " + str(i) + " size: " + str(len(data_sequence) - 1))
-            #aux+=1
-            next_day_value = data_sequence.iloc[i + 1][predefined_type_of_price]
-            next_next_day_value = data_sequence.iloc[i + 2][predefined_type_of_price]
-            #print(next_day_value)
-        if i > 1 and previous_day_value < day_value and day_value > next_day_value and day_value > previous_previous_day_value and day_value > next_next_day_value: #hemos encontrado un maximo
+        if i > 1 and all(x <= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x <= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un maximo
             relative_maximum = day_value
             if relative_maximum > first_top[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
                 third_top = second_top
@@ -280,6 +275,8 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None
     if first_top_to_support_distance * 0.85 < second_top_to_support_distance or first_top_to_support_distance * 0.85 < third_top_to_support_distance:
         return None
+    if (first_top[0]/second_top[0] < 1.007 and first_top[0]/second_top[0] > 0.993) or (first_top[0]/third_top[0] < 1.007 and first_top[0]/third_top[0] > 0.993):
+        return None
     
     # Comprobar la altura entre los suelos y la cabeza
     if not (second_top_support[0]/third_top_support[0] < 1.02 and second_top_support[0]/third_top_support[0] > 0.98):
@@ -317,16 +314,10 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     average_height = abs(((first_top[0] + second_top[0]) / 2) - support[0])
     objective = support[0] - average_height
     if pattern_width:
-        for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width):
-            if i+2 >= len(longer_data_sequence):
-                break
-            current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-            if all(x > support[0] for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
-                return [False, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
-                #return [False, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
-            if all(x < objective for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
-                return [True, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
-                #return [True, longer_data_sequence.iloc[first_top[1]-30:first_top[1]+30], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+        if any(x < objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:breaks_support_from_right[1] + pattern_width][predefined_type_of_price]):
+            return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+        else:
+            return [False, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
     else:
         return None
 
@@ -425,15 +416,12 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None # Patrón demasiado pequeño
     average_height = abs(((first_bottom[0] + second_bottom[0] + third_bottom[0]) / 3) - resistance[0])
     objective = resistance[0] + average_height
+    limit = breaks_support_from_right[1] + pattern_width
     if pattern_width:
-        for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width):
-            if i+2 >= len(longer_data_sequence):
-                break
-            current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-            if all(x < resistance[0] for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
-                return [False, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
-            if all(x > objective for x in longer_data_sequence.iloc[i:i+2][predefined_type_of_price]):
-                return [True, longer_data_sequence.iloc[:i + 3], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+        if any(x > objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:limit][predefined_type_of_price]):
+            return [True, longer_data_sequence.iloc[:limit], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+        else:
+            return [False, longer_data_sequence.iloc[:limit], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
     else:
         return None
 

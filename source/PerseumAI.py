@@ -109,7 +109,7 @@ class MenuWindow:
         #self.warning_file_label.pack()
         self.intensive_search_frame.pack()
         self.intensive_search_check.pack()
-        self.run_button.pack(pady=(100,5))
+        self.run_button.pack(pady=(50,5))
         self.quit_button.pack()
         self.table.place(relx=0.82, rely=0.3, anchor='c')
 
