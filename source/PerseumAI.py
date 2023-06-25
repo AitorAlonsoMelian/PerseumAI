@@ -94,6 +94,10 @@ class MenuWindow:
         self.image_table_2 = ImageTk.PhotoImage(self.image_table)
         self.table = Label(self.frame, image=self.image_table_2)
         self.FileFormat = Label(self.frame, text='File format', font=FONT, bg=MAIN_BG, fg=FG)
+        self.imageFileFormat = Image.open('./resources/images/FileFormat.jpg')
+        self.imageFileFormat = self.imageFileFormat.resize((100, 150), Image.LANCZOS)
+        self.imageFileFormat_2 = ImageTk.PhotoImage(self.imageFileFormat)
+        self.FileFormatImage = Label(self.frame, image=self.imageFileFormat_2)
             
         self.patterns_type.pack()
         self.types_frame.pack()
@@ -107,6 +111,10 @@ class MenuWindow:
         self.Dates.pack(pady=5)
         self.open_file_button.pack(pady=5)
         self.selected_file.pack()
+        self.FileFormat.pack()
+        #self.FileFormatImage.place(relx=0.8, rely=0.61, anchor='c')
+        self.FileFormatImage.pack()
+
         #self.warning_file_label.pack()
         #self.intensive_search_frame.pack()
         #self.intensive_search_check.pack()
@@ -116,7 +124,7 @@ class MenuWindow:
 
 
         #self.frame.pack(fill=BOTH, expand=True)
-        self.frame.place(relx=.5, rely=.5, anchor='c', height=500, width=1100)
+        self.frame.place(relx=.5, rely=.5, anchor='c', height=650, width=1100)
         
     def runProgram(self):
         """Execute the back-end program with the parametes given by the user"""
@@ -321,7 +329,7 @@ class ShowPatternsWindow:
             canvas.get_tk_widget().pack(side=LEFT, pady=10)
             if pattern.tendency is True:
                 pattern_tendency_text = Text(temp_frame, height=1, width=2, bg="#40BD2E")
-                tendency = '✅'
+                tendency = '✔️'
             elif pattern.tendency is False:
                 pattern_tendency_text = Text(temp_frame, height=1, width=2, bg="red")
                 tendency = '❌'
