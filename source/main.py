@@ -4,6 +4,7 @@ import pattern_utils
 import sys
 import tendencyCalculator as tc
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 
 WINDOW_SIZE = 130
 
@@ -31,7 +32,7 @@ def trainHistoricDatabase(company, patterns_dictionary, initial_date, final_date
     average_tendency = pattern_utils.calculateTendencyProbability(patterns_found, patterns_dictionary.keys())
     return patterns_found
 #
-def findCurrentPatterns(company, patterns_dictionary, intensive_search):
+def findCurrentPatterns(company, patterns_dictionary, window_size):
     """
     Finds if there are patterns in today's stock market  
 
@@ -41,11 +42,11 @@ def findCurrentPatterns(company, patterns_dictionary, intensive_search):
     Returns:  
         patterns_found (List[Pattern]): A list containing all the patterns that were found
     """
-    company_dataframe = get_company_data.getCompanyDataWithYahoo(company, '2022-01-01')
+    company_dataframe = get_company_data.getCompanyDataWithYahoo(company, (datetime.today() - timedelta(days=window_size)).strftime("%Y-%m-%d") ,datetime.today().strftime("%Y-%m-%d"))
     if company_dataframe.empty:
         exit("Dataframe vacío")
-    min_size, max_size = pattern_utils.minimumAndMaximumPatternSizes(patterns_dictionary)
-    patterns_found = pattern_search.findCurrentPatterns(min_size, max_size, company_dataframe, patterns_dictionary, company, intensive_search)
+    #min_size, max_size = pattern_utils.minimumAndMaximumPatternSizes(patterns_dictionary)
+    patterns_found = pattern_search.findCurrentPatterns(company_dataframe, patterns_dictionary, company)
     return patterns_found
 
 if len(sys.argv) > 1:

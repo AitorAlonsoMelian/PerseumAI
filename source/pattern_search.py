@@ -9,7 +9,7 @@ import normalize_utils as nu
 INCREMENT = 25
 SMA_VALUE = 3
     
-def findCurrentPatterns(start_index, finish_index, company_dataframe, patterns_dictionary, company_name, intensive_search):
+def findCurrentPatterns(company_dataframe, patterns_dictionary, company_name):
     """Find patterns that are occuring the day of the search  
     
     Args:  
@@ -21,34 +21,16 @@ def findCurrentPatterns(start_index, finish_index, company_dataframe, patterns_d
     Returns:  
         results (List[Pattern]): list of patterns found
     """
-    distances_dict = {
-        'double_top': [pattern_utils.BIG_NUMBER, -1],
-        'double_bottom': [pattern_utils.BIG_NUMBER, -1]
-    }
-    patterns_dictionary_copy = patterns_dictionary.copy()
     results = []
-    for i in range(finish_index, start_index, -1): # hay que añadir que itere por todos y que se quede con el de menor distancia 
-        if len(patterns_dictionary_copy.keys()) == 1:
-            break
-        if i > len(company_dataframe):
-            i = len(company_dataframe)
-        sliced_dataframe = company_dataframe.iloc[len(company_dataframe) - i:]
-        normalized_vector = nu.normalizeVector(sliced_dataframe['Close'].tolist())
-        new_pattern_type, distance = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary_copy)
-        if new_pattern_type != 'rest_normalized':
-            if intensive_search == True:
-                if distance < distances_dict[new_pattern_type][0]:
-                    distances_dict[new_pattern_type] = [distance, i]
-            else:
-                distances_dict[new_pattern_type] = [distance, i]
-                patterns_dictionary_copy.pop(new_pattern_type)
-
-    for key in distances_dict:
-        if distances_dict[key][1] == -1:
-            continue
-        new_pattern = p.Pattern(key, company_dataframe[len(company_dataframe) - distances_dict[key][1]:], company_name, str(company_dataframe.iloc[len(company_dataframe) - i].name), str(company_dataframe.iloc[len(company_dataframe) - 1].name), None, distance)
-        results.append(new_pattern)
-            #patterns_dictionary_copy.pop(new_pattern_type)
+    company_dataframe = pattern_utils.calculateSimpleMovingAverage(company_dataframe, SMA_VALUE)
+    company_dataframe = company_dataframe.iloc[SMA_VALUE-1:]
+    normalized_vector = nu.normalizeVector(company_dataframe['SMA'].tolist())
+    new_pattern_type, distance = pattern_utils.findCommonPattern(normalized_vector, patterns_dictionary)
+    if distance < 30:
+        pattern_tendency = tc.findPatternTendency(company_dataframe, company_dataframe, new_pattern_type)
+        if pattern_tendency != None:
+            new_pattern = p.Pattern(new_pattern_type, company_dataframe, company_name, str(company_dataframe.iloc[0].name), str(company_dataframe.iloc[-1].name), None, distance, pattern_tendency[2])
+            results.append(new_pattern)
 
     return results
 

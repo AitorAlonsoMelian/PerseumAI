@@ -93,6 +93,7 @@ class MenuWindow:
         self.image_table = Image.open('./resources/images/Table.jpg')
         self.image_table_2 = ImageTk.PhotoImage(self.image_table)
         self.table = Label(self.frame, image=self.image_table_2)
+        self.FileFormat = Label(self.frame, text='File format', font=FONT, bg=MAIN_BG, fg=FG)
             
         self.patterns_type.pack()
         self.types_frame.pack()
@@ -107,8 +108,8 @@ class MenuWindow:
         self.open_file_button.pack(pady=5)
         self.selected_file.pack()
         #self.warning_file_label.pack()
-        self.intensive_search_frame.pack()
-        self.intensive_search_check.pack()
+        #self.intensive_search_frame.pack()
+        #self.intensive_search_check.pack()
         self.run_button.pack(pady=(50,5))
         self.quit_button.pack()
         self.table.place(relx=0.82, rely=0.3, anchor='c')
@@ -157,7 +158,7 @@ class MenuWindow:
             raise Exception('Enter a valid year format %dddd')
         for company in self.companies:
             historic_results = historic_results + mn.trainHistoricDatabase(company, patterns_dictionary, self.InitialDate.get_date(), self.EndingDate.get_date(), int(self.window_entry.get()))
-            current_results = current_results + mn.findCurrentPatterns(company, patterns_dictionary, self.intensive_search_value.get())
+            current_results = current_results + mn.findCurrentPatterns(company, patterns_dictionary, int(self.window_entry.get()))
             self.progressbar.step(1)
             self.percentage.configure(text=str(int((self.progressbar['value']/self.progressbar['maximum'])*100)) + '%')
             #print(round((self.progressbar['value']/self.progressbar['maximum'])*100, 0), '%')
