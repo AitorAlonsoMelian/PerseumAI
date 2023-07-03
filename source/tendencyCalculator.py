@@ -463,7 +463,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     # Comprobar que el máximo absoluto está en el primer tercio del patrón
     if absolute_maximum[1] > len(data_sequence) / 3:
         return None 
-    # Comprobar que los picos son decrecientes
+    # Comprobar que los máximos locales son decrecientes
     for i in range(len(local_maxs)):
         if local_maxs[i] <= absolute_maximum[1]:
             continue
@@ -495,7 +495,7 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     if intersection is None:
         new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
     else:
-        print("Intersection: " + str(intersection))
+        #print("Intersection: " + str(intersection))
         new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
     new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 
@@ -559,7 +559,7 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
     # Comprobar que el máximo absoluto está en el primer tercio del patrón
     if absolute_minimum[1] > len(data_sequence) / 3:
         return None 
-    # Comprobar que los picos son decrecientes
+    # Comprobar que los mínimos locales son ascendentes
     for i in range(len(local_mins)):
         if local_mins[i] <= absolute_minimum[1]:
             continue
@@ -591,7 +591,7 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
     if intersection is None:
         new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
     else:
-        print("Intersection: " + str(intersection))
+        #print("Intersection: " + str(intersection))
         new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
     new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 

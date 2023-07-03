@@ -71,7 +71,7 @@ def createDatasetsFromList(list, patterns_path):
 # ]
 
 companies_list = [ 
-    ['ARGT', '2022-12-16', '2023-05-22', 'ascending_triangle'],
+    ['STXD', '2022-12-20', '2023-06-7', 'inv_head_and_shoulders'],
 ]
 
 #createDatasetsFromList(companies_list, './patterns/')

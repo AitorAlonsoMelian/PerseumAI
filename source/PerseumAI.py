@@ -7,6 +7,7 @@ from tkcalendar import Calendar, DateEntry
 from PIL import Image, ImageTk
 from matplotlib.pyplot import text, title
 from matplotlib.figure import Figure
+import matplotlib.dates as mdates
 import pattern_utils
 import main as mn
 import matplotlib.pyplot as plt
@@ -75,7 +76,7 @@ class MenuWindow:
         self.Dates = Frame(self.frame, bg=MAIN_BG)
         self.DatesText = Frame(self.frame, bg=MAIN_BG)
         self.InitialText = Label(self.DatesText, text='Initial date', font=FONT, bg=MAIN_BG, fg=FG)
-        self.EndingText = Label(self.DatesText, text='EndingDate', font=FONT, bg=MAIN_BG, fg=FG)
+        self.EndingText = Label(self.DatesText, text='Ending date', font=FONT, bg=MAIN_BG, fg=FG)
         self.InitialDate = DateEntry(self.Dates)
         self.EndingDate = DateEntry(self.Dates)
         self.window_label = Label(self.frame, text='Window size', font=FONT, bg=MAIN_BG, fg=FG)
@@ -120,7 +121,7 @@ class MenuWindow:
         #self.intensive_search_check.pack()
         self.run_button.pack(pady=(50,5))
         self.quit_button.pack()
-        self.table.place(relx=0.82, rely=0.3, anchor='c')
+        self.table.place(relx=0.82, rely=0.23, anchor='c')
 
 
         #self.frame.pack(fill=BOTH, expand=True)
@@ -307,26 +308,20 @@ class ShowPatternsWindow:
             temp_frame = Frame(self.second_frame, bg=MAIN_BG)
             fig = Figure(figsize = (9,5), dpi = 100)
             plot1 = fig.add_subplot(111)
-            #print(pattern.dataframe_segment.info())
             plot1.plot(pattern.dataframe_segment.iloc[:, 0])
-            # df2 = pd.DataFrame({
-            #     'Date': pd.date_range("20130101", periods=2),
-            #     'Close': [160,180]
-            # })
-            #print("\n\n")
             df2 = pattern.points
-            #print(df2.info())
             if pattern.points is not None:
                 if (isinstance(pattern.points, list)):
                     plot1.plot(df2[0])
                     plot1.plot(df2[1])
                 else:  
                     plot1.plot(df2)
-            fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
+            #fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')
+            fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]}')
             canvas = FigureCanvasTkAgg(fig, master=temp_frame)
             canvas.draw()
             temp_frame.pack()
-            canvas.get_tk_widget().pack(side=LEFT, pady=10)
+            canvas.get_tk_widget().pack(side=LEFT, pady=25)
             if pattern.tendency is True:
                 pattern_tendency_text = Text(temp_frame, height=1, width=2, bg="#40BD2E")
                 tendency = '✔️'
@@ -337,10 +332,12 @@ class ShowPatternsWindow:
                 continue
             pattern_tendency_text.insert(INSERT, tendency)
             pattern_tendency_text.pack(side=RIGHT, padx=20)
-
-            # toolbar = NavigationToolbar2Tk(canvas, self.second_frame)
-            # toolbar.update()
-            # canvas.get_tk_widget().pack()
+            # Ajustar las fechas del eje X para que no se superpongan
+            for ax in fig.axes:
+                ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+                ax.tick_params(axis='x', rotation=30)
+            fig.tight_layout()
 
 def main():
     """Main function for GUI app"""
