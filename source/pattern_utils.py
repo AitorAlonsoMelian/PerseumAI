@@ -218,7 +218,7 @@ def calculateTendencyProbability(results, pattern_types):
         if value[1] == 0:
             average_tendency_dict[pattern_type] = 'Not found'
         else: 
-            average_tendency_dict[pattern_type] = value[0] / value[1] * 100
+            average_tendency_dict[pattern_type] = [value[0] / value[1] * 100, value[1]]
     return average_tendency_dict
 
 def calculateSimpleMovingAverage(dataframe, window_size):

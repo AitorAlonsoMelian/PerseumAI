@@ -229,16 +229,12 @@ class ResultsWindow:
         self.frame = Frame(self.master, bg=MAIN_BG)
         temp_text = ''
         for key, value in tendency_results.items():
-            if isinstance(value, float):
-                value = str(round(value)) + '%'
-            # if key == 'double_top':
-            #     temp_text += f'Double top: {value}\n'
-            # elif key == 'double_bottom':
-            #     temp_text += f'Double bottom: {value}\n'
-            # elif key == 'triple_top':
-            #     temp_text += f'Triple top: {value}\n' 
+            if isinstance(value[0], float):
+                valueT = str(round(value[0])) + '%'
+            else:
+                valueT = 'Not Found'
             aux = key.replace('_', ' ')
-            temp_text += f'{aux.capitalize()}: {value}\n'
+            temp_text += f'{aux.capitalize()}: {valueT} in {str(value[1])} patterns\n'
             
 
         self.title_text = Label(self.frame, text='Achieve objective probability', font=(FONT,18), fg=FG, bg=MAIN_BG, highlightthickness=0)
