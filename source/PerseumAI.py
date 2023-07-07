@@ -308,8 +308,8 @@ class ShowPatternsWindow:
             df2 = pattern.points
             if pattern.points is not None:
                 if (isinstance(pattern.points, list)):
-                    plot1.plot(df2[0])
-                    plot1.plot(df2[1])
+                    for x in pattern.points:
+                        plot1.plot(x)
                 else:  
                     plot1.plot(df2)
             #fig.suptitle(f'{pattern.company_name} {pattern.pattern_type} {pattern.starting_date[:10]} - {pattern.ending_date[:10]} Distance: {round(pattern.distance, 2)}')

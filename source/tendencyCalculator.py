@@ -97,6 +97,14 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
     average_height = ((first_top[0] + second_top[0]) / 2) - support[0]
     objective = support[0] - average_height
 
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[breaks_support_from_right[1]]].index, name='Close')
+    if breaks_support_from_right[1] + pattern_width >= len(longer_data_sequence):
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[len(longer_data_sequence) - 1]].index)
+    else:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[breaks_support_from_right[1] + pattern_width]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
+
     if pattern_width:
         # for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width * 2):
         #     if i >= len(longer_data_sequence):
@@ -107,9 +115,9 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
         #     if current_value < objective:
         #         return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
         if any(x < objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:breaks_support_from_right[1] + pattern_width][predefined_type_of_price]):
-            return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+            return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price], objective_line]]
         else:
-            return [False, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
+            return [False, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price], objective_line]]
     else:
         return None #Significa que el valor no cruzo ningun limite
 
@@ -184,6 +192,15 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
 
     average_height = abs(((first_bottom[0] + second_bottom[0]) / 2) - resistance[0])
     objective = resistance[0] + average_height
+
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[breaks_resistance_from_right[1]]].index, name='Close')
+    if breaks_resistance_from_right[1] + pattern_width >= len(longer_data_sequence):
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[len(longer_data_sequence) - 1]].index)
+    else:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[breaks_resistance_from_right[1] + pattern_width]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
+
     if pattern_width:
         # for i in range(breaks_resistance_from_right[1], breaks_resistance_from_right[1] + pattern_width):
         #     if i >= len(longer_data_sequence):
@@ -194,9 +211,9 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
         #     if current_value > objective:
         #         return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
         if any(x > objective for x in longer_data_sequence.iloc[breaks_resistance_from_right[1]:breaks_resistance_from_right[1] + pattern_width][predefined_type_of_price]):
-            return [True, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
+            return [True, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price], objective_line]]
         else:
-            return [False, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
+            return [False, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price], objective_line]]
     else:
         return None #Significa que el valor no cruzo ningun limite
     
@@ -313,11 +330,20 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
 
     average_height = abs(((first_top[0] + second_top[0]) / 2) - support[0])
     objective = support[0] - average_height
+
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[breaks_support_from_right[1]]].index, name='Close')
+    if breaks_support_from_right[1] + pattern_width >= len(longer_data_sequence):
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[len(longer_data_sequence) - 1]].index)
+    else:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[breaks_support_from_right[1] + pattern_width]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
+
     if pattern_width:
         if any(x < objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:breaks_support_from_right[1] + pattern_width][predefined_type_of_price]):
-            return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+            return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], [longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price], objective_line]]
         else:
-            return [False, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price]]
+            return [False, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], [longer_data_sequence.iloc[[second_top[1],first_top[1],third_top[1]]][predefined_type_of_price], objective_line]]
     else:
         return None
 
@@ -416,12 +442,21 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
         return None # Patrón demasiado pequeño
     average_height = abs(((first_bottom[0] + second_bottom[0] + third_bottom[0]) / 3) - resistance[0])
     objective = resistance[0] + average_height
+
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[breaks_support_from_right[1]]].index, name='Close')
+    if breaks_support_from_right[1] + pattern_width >= len(longer_data_sequence):
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[len(longer_data_sequence) - 1]].index)
+    else:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[breaks_support_from_right[1] + pattern_width]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
+
     limit = breaks_support_from_right[1] + pattern_width
     if pattern_width:
         if any(x > objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:limit][predefined_type_of_price]):
-            return [True, longer_data_sequence.iloc[:limit], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+            return [True, longer_data_sequence.iloc[:limit], [longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price], objective_line]]
         else:
-            return [False, longer_data_sequence.iloc[:limit], longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price]]
+            return [False, longer_data_sequence.iloc[:limit], [longer_data_sequence.iloc[[second_bottom[1],first_bottom[1],third_bottom[1]]][predefined_type_of_price], objective_line]]
     else:
         return None
 
@@ -510,14 +545,21 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
 
     #Comprobar que se cumple el objetivo del patrón.
     objective = support[0] - ((absolute_maximum[0] - support[0])*0.70)
+
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[-1]].index, name='Close')
+    new_date_3 = pd.to_datetime(data_sequence.iloc[[-1]].index) + pd.DateOffset(days=(int(len(data_sequence)* 1.5)))
+    if new_date_3 > longer_data_sequence.iloc[[-1]].index:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[-1]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
         
     limit = len(data_sequence) * 2
     if limit > len(longer_data_sequence):
         limit = len(longer_data_sequence)-1
     if any(x <= objective for x in longer_data_sequence.iloc[len(data_sequence):limit][predefined_type_of_price]):
-        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line, objective_line]]
     else:
-        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line, objective_line]]
     
 
 
@@ -606,11 +648,18 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
 
     #Comprobar que se cumple el objetivo del patrón.
     objective = resistance[0] + ((resistance[0] - absolute_minimum[0])*0.70)
+
+    objective_line = pd.Series(objective, index=data_sequence.iloc[[-1]].index, name='Close')
+    new_date_3 = pd.to_datetime(data_sequence.iloc[[-1]].index) + pd.DateOffset(days=(int(len(data_sequence)* 1.5)))
+    if new_date_3 > longer_data_sequence.iloc[[-1]].index:
+        new_date_3 = pd.to_datetime(longer_data_sequence.iloc[[-1]].index)
+    objective_line_2 = pd.Series(objective, index=new_date_3, name='Close')
+    objective_line = pd.concat([objective_line, objective_line_2])
         
     limit = len(data_sequence) * 2
     if limit > len(longer_data_sequence):
         limit = len(longer_data_sequence)-1
     if any(x >= objective for x in longer_data_sequence.iloc[len(data_sequence):limit][predefined_type_of_price]):
-        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+        return [True, longer_data_sequence.iloc[:limit], [support_line, diagonal_line, objective_line]]
     else:
-        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line]]
+        return [False, longer_data_sequence.iloc[:limit], [support_line, diagonal_line, objective_line]]
