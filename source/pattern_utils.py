@@ -47,7 +47,6 @@ def loadPatterns(number_of_desired_patterns, pattern_types_set):
         for index in elected_files_indexes_set:
             file = file_list[index]
             single_file_results = []
-            #print("Opening file: " + file)
             with open(PATTERNS_FILE_PATH + pattern_type + '/' + file) as csvfile:
                 reader = csv.reader(csvfile)
                 next(reader, None)
@@ -57,7 +56,6 @@ def loadPatterns(number_of_desired_patterns, pattern_types_set):
             total_results.append(single_file_results)
         patterns_dictionary[pattern_type] = total_results
     patterns_dictionary = calculateDictSimpleMovingAverage(patterns_dictionary, 3)
-    #print(patterns_dictionary)
     return patterns_dictionary
 
 def findCommonPattern(normalized_vector, all_patterns_dictionary):
@@ -83,16 +81,12 @@ def findCommonPattern(normalized_vector, all_patterns_dictionary):
         if pattern_type != 'rest_normalized':
             array_of_distances = np.array(array_of_distances)
             mean = np.mean(array_of_distances)
-            #print(array_of_distances)
-            #print("Mean: " + str(mean))
             dict_of_distances[pattern_type] = mean
-            #print(dict_of_distances)
 
     for pattern_type, distance in dict_of_distances.items():
         if distance < minimun_distance:
             common_pattern_type = pattern_type
             minimun_distance = distance
-    #print("Common pattern found: " + common_pattern_type + " with distance: " + str(minimun_distance))
     return common_pattern_type, minimun_distance
 
 def enhanceDataframe(distance_found, pattern_type, sliced_vector, all_patterns_dictionary, window_divisions):
@@ -243,7 +237,6 @@ def calculateDictSimpleMovingAverage(patterns_dict, window_size):
         Return:  
             patterns_dict (Dict{}): dictionary containing the prices and the moving average
     """
-    results = dict()
     for key, vector in patterns_dict.items():
         for i in range(len(vector)):
             vector[i] = calculateArraySimpleMovingAverage(vector[i], window_size)

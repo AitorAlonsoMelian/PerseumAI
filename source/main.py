@@ -12,8 +12,6 @@ WINDOW_SIZE = 130
 Main file for programme. This script manages user input and executes the highest-level functions
 """
 
-#company_json = get_company_data.getCompanyData('AAP')
-#company_dataframe = one_day_pattern_search.createMorningDataframeFromJson('2022-04-01', company_json)
 def trainHistoricDatabase(company, patterns_dictionary, initial_date, final_date, window_size = WINDOW_SIZE):
     """
     Reads the database and trains the data starting from the given year  
@@ -28,7 +26,6 @@ def trainHistoricDatabase(company, patterns_dictionary, initial_date, final_date
     if company_dataframe.empty:
         exit("Dataframe vacío")
     patterns_found = pattern_search.findHistoricPatterns(window_size, company_dataframe, patterns_dictionary, company)
-    #plt.show()
     average_tendency = pattern_utils.calculateTendencyProbability(patterns_found, patterns_dictionary.keys())
     return patterns_found
 #
@@ -45,7 +42,6 @@ def findCurrentPatterns(company, patterns_dictionary, window_size):
     company_dataframe = get_company_data.getCompanyDataWithYahoo(company, (datetime.today() - timedelta(days=window_size)).strftime("%Y-%m-%d") ,datetime.today().strftime("%Y-%m-%d"))
     if company_dataframe.empty:
         exit("Dataframe vacío")
-    #min_size, max_size = pattern_utils.minimumAndMaximumPatternSizes(patterns_dictionary)
     patterns_found = pattern_search.findCurrentPatterns(company_dataframe, patterns_dictionary, company)
     return patterns_found
 

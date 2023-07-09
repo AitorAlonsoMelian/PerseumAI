@@ -170,7 +170,6 @@ class MenuWindow:
             current_results = current_results + mn.findCurrentPatterns(company, patterns_dictionary, int(self.window_entry.get()))
             self.progressbar.step(1)
             self.percentage.configure(text=str(int((self.progressbar['value']/self.progressbar['maximum'])*100)) + '%')
-            #print(round((self.progressbar['value']/self.progressbar['maximum'])*100, 0), '%')
         tendency_results = pattern_utils.calculateTendencyProbability(historic_results, selected_types_set)
         self.isRunning = False
         self.progressbar.stop()

@@ -39,7 +39,7 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if i > 1 and all(x <= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x <= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un maximo
             relative_maximum = day_value
-            if relative_maximum > first_top[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
+            if relative_maximum > first_top[0]: 
                 first_top = second_top
                 second_top = [relative_maximum, i]
             elif relative_maximum > second_top[0]:
@@ -56,7 +56,6 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
             support[1] = i
 
     #Añadir que los dos techo no estas muy lejos, como mucho en la mitad entre el mas alto y la linea de soporte
-
     first_top_to_support_distance = first_top[0] - support[0]
     second_top_to_support_distance = second_top[0] - support[0]
     if first_top_to_support_distance > second_top_to_support_distance and second_top_to_support_distance < first_top_to_support_distance * 2 / 3:
@@ -106,14 +105,6 @@ def findDoubleTopTendency(data_sequence, longer_data_sequence):
     objective_line = pd.concat([objective_line, objective_line_2])
 
     if pattern_width:
-        # for i in range(breaks_support_from_right[1], breaks_support_from_right[1] + pattern_width * 2):
-        #     if i >= len(longer_data_sequence):
-        #         break
-        #     current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-        #     if current_value > support[0]:
-        #         return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
-        #     if current_value < objective:
-        #         return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price]]
         if any(x < objective for x in longer_data_sequence.iloc[breaks_support_from_right[1]:breaks_support_from_right[1] + pattern_width][predefined_type_of_price]):
             return [True, longer_data_sequence.iloc[:breaks_support_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_top[1],second_top[1]]][predefined_type_of_price], objective_line]]
         else:
@@ -137,7 +128,7 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if i > 1 and all(x > day_value for x in data_sequence.iloc[i - 2:i][predefined_type_of_price]) and all(x > day_value for x in data_sequence.iloc[i + 1:i + 3][predefined_type_of_price]):
             relative_minimum = day_value
-            if relative_minimum < first_bottom[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
+            if relative_minimum < first_bottom[0]:
                 first_bottom = second_bottom
                 second_bottom = [relative_minimum, i]
             elif relative_minimum < second_bottom[0]:
@@ -147,26 +138,26 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
         return None #No se encontraron dos suelos
 
     resistance = [0, None]
-    for i in range(first_bottom[1], second_bottom[1]): #Busqueda de la linea de apoyo
+    for i in range(first_bottom[1], second_bottom[1]): #Busqueda de la linea de resistencia
         current_value = data_sequence.iloc[i][predefined_type_of_price]
         if current_value > resistance[0]:
             resistance[0] = current_value
             resistance[1] = i
 
-    # Comprobamos si los suelos no estan muy lejos
+    # Comprobamos si las resistencias no estan muy lejos
     first_bottom_to_resistance_distance = resistance[0] - first_bottom[0]
     second_bottom_to_resistance_distance = resistance[0] - second_bottom[0]
     if first_bottom_to_resistance_distance > second_bottom_to_resistance_distance and second_bottom_to_resistance_distance < first_bottom_to_resistance_distance * 2 / 3:
-        return None # Demasiada diferencia entre suelos
+        return None # Demasiada diferencia entre resistencias
     if second_bottom_to_resistance_distance > first_bottom_to_resistance_distance and first_bottom_to_resistance_distance < second_bottom_to_resistance_distance * 2 / 3:
-        return None # Demasiada diferencia entre suelos
+        return None # Demasiada diferencia entre resistencias
     if abs(first_bottom[1] - second_bottom[1]) < 5:
         return None
 
     breaks_resistance_from_left = [False, None]
     breaks_resistance_from_right = [False, None]
 
-    #Confirmar que en rompe por la linea de apoyo en ambos lados
+    #Confirmar que en rompe por la linea de resistencia en ambos lados
     i = first_bottom[1]
     while i >= 0 and not breaks_resistance_from_left[0]:
         current_value_left = data_sequence.iloc[i][predefined_type_of_price]
@@ -184,7 +175,7 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
             breaks_resistance_from_right[1] = i
         i += 1
 
-    if breaks_resistance_from_left[1] is None or breaks_resistance_from_right[1] is None: # Comprobar que se rompe la linea de apoyo
+    if breaks_resistance_from_left[1] is None or breaks_resistance_from_right[1] is None: # Comprobar que se rompe la linea de resistencia
         return None # Pattern\'s resistance not broken
     #Una vez rompe el patron, debemos averiguar en que direccion
 
@@ -202,14 +193,6 @@ def findDoubleBottomTendency(data_sequence, longer_data_sequence):
     objective_line = pd.concat([objective_line, objective_line_2])
 
     if pattern_width:
-        # for i in range(breaks_resistance_from_right[1], breaks_resistance_from_right[1] + pattern_width):
-        #     if i >= len(longer_data_sequence):
-        #         break
-        #     current_value = longer_data_sequence.iloc[i][predefined_type_of_price]
-        #     if current_value < resistance[0]:
-        #         return [False, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
-        #     if current_value > objective:
-        #         return [True, longer_data_sequence.iloc[:i + 1], longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price]]
         if any(x > objective for x in longer_data_sequence.iloc[breaks_resistance_from_right[1]:breaks_resistance_from_right[1] + pattern_width][predefined_type_of_price]):
             return [True, longer_data_sequence.iloc[:breaks_resistance_from_right[1] + pattern_width], [longer_data_sequence.iloc[[first_bottom[1],second_bottom[1]]][predefined_type_of_price], objective_line]]
         else:
@@ -230,13 +213,11 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
     first_top = [0, None] #index 0 representa el valor y el index 1 representa la posicion dentro del dataframe
     second_top = [0, None]
     third_top = [0, None]
-    #aux = 0
-    #print(data_sequence)
     for i in range(len(data_sequence) - 3): #Buscar 3 tops
         day_value = data_sequence.iloc[i][predefined_type_of_price]
         if i > 1 and all(x <= day_value for x in data_sequence.iloc[i-2:i][predefined_type_of_price]) and all(x <= day_value for x in data_sequence.iloc[i+1:i+3][predefined_type_of_price]): #hemos encontrado un maximo
             relative_maximum = day_value
-            if relative_maximum > first_top[0]: # [1] para acceder a lo que no es timestamps y Close porque es la etiqueta del valor
+            if relative_maximum > first_top[0]: 
                 third_top = second_top
                 second_top = first_top
                 first_top = [relative_maximum, i]
@@ -282,7 +263,7 @@ def findHeadAndShouldersTendency(data_sequence, longer_data_sequence):
                 second_top_support[0] = current_value
                 second_top_support[1] = i
 
-    # Se comprueba que los picos están a alturas similares
+    # Se comprueba que los hombros están a alturas similares
     first_top_to_support_distance = first_top[0] - support[0]
     second_top_to_support_distance = second_top[0] - support[0]
     third_top_to_support_distance = third_top[0] - support[0]
@@ -435,7 +416,6 @@ def findInverseHeadAndShouldersTendency(data_sequence, longer_data_sequence):
 
     if breaks_support_from_left[1] is None or breaks_support_from_right[1] is None: # Comprobar que se rompe la linea de apoyo
         return None # Pattern\'s support not broken
-    #Una vez rompe el patron, debemos averiguar en que direccion
 
     pattern_width = breaks_support_from_right[1] - breaks_support_from_left[1]
     if pattern_width < 12:
@@ -530,7 +510,6 @@ def findDescendingTriangleTendency(data_sequence, longer_data_sequence):
     if intersection is None:
         new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
     else:
-        #print("Intersection: " + str(intersection))
         new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
     new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 
@@ -595,7 +574,7 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
         if data_sequence.iloc[i][predefined_type_of_price] < absolute_minimum[0]:
             absolute_minimum = [data_sequence.iloc[i][predefined_type_of_price], i]
 
-    #  Comprobar que el precio se acerca al soporte al menos 3 veces
+    #  Comprobar que el precio se acerca a la resistencia al menos 3 veces
     if times_near_resistance < 3:
         return None
     # Comprobar que el máximo absoluto está en el primer tercio del patrón
@@ -633,7 +612,6 @@ def findAscendingTriangleTendency(data_sequence, longer_data_sequence):
     if intersection is None:
         new_date_2 = pd.to_datetime(data_sequence.iloc[[-1]].index) #+ pd.DateOffset(days=5)
     else:
-        #print("Intersection: " + str(intersection))
         new_date_2 = pd.to_datetime(data_sequence.iloc[[intersection]].index)
     new_entry_2 = pd.Series(support_line.iloc[0], index=new_date_2, name='Close')
 
