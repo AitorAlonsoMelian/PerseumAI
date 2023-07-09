@@ -55,7 +55,7 @@ class MenuWindow:
     def __init__(self, master):
         self.master = master
         self.companies = None
-        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Ascending Triangle', 'Descending Triangle', 'Inverse H&S']
+        pattern_types = ['Double top', 'Double bottom', 'Head & Shoulders', 'Inverse H&S', 'Ascending Triangle', 'Descending Triangle']
         self.selected_types = []
         self.file_name = ''
         self.isRunning = False
