@@ -5,24 +5,6 @@ import matplotlib.pyplot as plt
 from random import randint
 import os
 
-def getCompanyDataWithAlpha(company):
-    """
-    Gets company data using Alpha API  
-
-    Args:  
-        company (str): Company name  
-    Returns:
-        Dict[]: Dictionary with all price and dates data 
-    """
-    api_key = 'H9KPSUTGEPR86VB6'
-    time_interval = 5
-    history_slice = 'year1month2'
-    URL = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={company}&interval={time_interval}min&slice={history_slice}&apikey={api_key}]'
-    download = requests.get(URL).json()
-    dict = download[f'Time Series ({time_interval}min)']
-    
-    return dict
-
 def getCompanyDataWithYahoo(company, start_date, finish_date=None):
     """
     Gets company data using Yahoo Finance API  
