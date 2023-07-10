@@ -5,7 +5,7 @@
 > 14/07/2023
 
 ## ¿Que es PerseumAI?
-PerseumAI es una herramienta cuyo objetivo es identificar patrones chartistas en bolsa para el conjunto de empresas que el usuario proporcione.
+PerseumAI es una herramienta cuyo objetivo es identificar patrones chartistas en bolsa para el conjunto de empresas que el usuario proporcione. Este proyecto es una continuación del proyecto de Gabriel García, el cual está alojado en el siguiente **[repositorio](https://github.com/GJaubert/PerseumAI)**.
 
 Actualmente es capaz de identificar los siguientes patrones:
 - Doble suelo
