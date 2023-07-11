@@ -17,10 +17,10 @@ Actualmente es capaz de identificar los siguientes patrones:
 
 ## Instalación
 Hay dos maneras de ejecutar el programa. 
-#### Ejecutable Windows
+### Ejecutable Windows
 Si desea ejecutar el programa mediante un ejecutable de Windows, puede descargarlo del siguiente **[enlace](https://drive.google.com/file/d/1HttBz1FRj8d0pMoaUGFGgnolzLUdVWx-/view?usp=sharing)**. Una vez descargado el archivo, se extrae mediante WinRar, y dentro de la carpeta se ejecuta el archivo '**PerseumAI.exe'**.
 
-#### Clonar el repositorio
+### Clonar el repositorio
 Se puede clonar el repositorio a través del siguiente comando:
 ```git clone https://github.com/AitorAlonsoMelian/PerseumAI.git```
 
