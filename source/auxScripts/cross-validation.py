@@ -15,10 +15,11 @@ import csv
 
 
 PATTERNS_FILE_PATH = 'patterns/'
-NUMBER_OF_TRAINING_PATTERNS = 10
+PATTERN_TO_ANALIZE = 'descending_triangle'
+NUMBER_OF_TRAINING_PATTERNS = 6
 
 pattern_types_set = set()
-pattern_types_set.add("head_and_shoulders")
+pattern_types_set.add(PATTERN_TO_ANALIZE)
 training_patterns_data = {}
 test_patterns_data = {}
 
@@ -57,10 +58,13 @@ for pattern_type in pattern_types_set:
     test_patterns_data[pattern_type] = total_results
 training_patterns_data = pattern_utils.calculateDictSimpleMovingAverage(training_patterns_data, 3)
 test_patterns_data = pattern_utils.calculateDictSimpleMovingAverage(test_patterns_data, 3)
-for test_pattern_vector in test_patterns_data["head_and_shoulders"]:
-    pattern_type, mean_distance = pattern_utils.findCommonPattern(test_pattern_vector, training_patterns_data)
-    print("Pattern type: " + pattern_type + " Mean distance: " + str(mean_distance))
+array_of_distances = []
+for test_pattern_vector in test_patterns_data[PATTERN_TO_ANALIZE]:
+    pattern_type, distance = pattern_utils.findCommonPattern(test_pattern_vector, training_patterns_data)
+    array_of_distances.append(distance)
+    #print("Pattern type: " + pattern_type + " Mean distance: " + str(distance))
 
+print("Mean distance for "+ PATTERN_TO_ANALIZE + ': ' + str(sum(array_of_distances) / len(array_of_distances)))
 #print(training_patterns_data)
 #print(test_patterns_data)
     
